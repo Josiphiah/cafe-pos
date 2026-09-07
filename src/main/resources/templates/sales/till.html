@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>New Sale · Café POS</title></head>
+<body>
+<main class="content">
+    <h1>New Sale</h1>
+
+    <p class="flash err" th:if="${error}" th:text="${error}">error</p>
+
+    <div class="till">
+        <!-- menu -->
+        <section class="menu">
+            <h2>Menu</h2>
+            <div class="menu-grid">
+                <form th:each="p : ${products}" method="post" th:action="@{/sales/add}">
+                    <input type="hidden" name="productId" th:value="${p.id}">
+                    <button type="submit" class="menu-btn">
+                        <span class="menu-name" th:text="${p.name}">Item</span>
+                        <span class="menu-price" th:text="'K ' + ${#numbers.formatDecimal(p.price,1,2)}">K 0.00</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- cart -->
+        <section class="cart">
+            <h2>Current sale</h2>
+
+            <table>
+                <thead>
+                <tr><th>Item</th><th>Qty</th><th class="num">Line (K)</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:if="${rows.isEmpty()}"><td colspan="4" class="muted">Cart is empty — tap a menu item.</td></tr>
+                <tr th:each="r : ${rows}">
+                    <td th:text="${r.product.name}">Item</td>
+                    <td>
+                        <form method="post" th:action="@{/sales/qty}" class="qty-form">
+                            <input type="hidden" name="productId" th:value="${r.product.id}">
+                            <input type="number" name="quantity" min="0" th:value="${r.quantity}" class="qty-input">
+                            <button type="submit" class="btn secondary tiny">set</button>
+                        </form>
+                    </td>
+                    <td class="num" th:text="${#numbers.formatDecimal(r.lineTotal,1,2)}">0.00</td>
+                    <td>
+                        <form method="post" th:action="@{/sales/remove}">
+                            <input type="hidden" name="productId" th:value="${r.product.id}">
+                            <button type="submit" class="btn danger tiny">×</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr><th>Total</th><th></th><th class="num" th:text="${#numbers.formatDecimal(total,1,2)}">0.00</th><th></th></tr>
+                <tr><td colspan="4" class="muted">Includes 16% VAT — broken out on the receipt.</td></tr>
+                </tfoot>
+            </table>
+
+            <div class="customer-box">
+                <div th:if="${customer}">
+                    Customer: <strong th:text="${customer.name}">Name</strong>
+                    (<span th:text="${customer.phone}">phone</span>)
+                    <form method="post" th:action="@{/sales/customer/clear}" style="display:inline">
+                        <button class="btn secondary tiny">remove</button>
+                    </form>
+                </div>
+                <form th:unless="${customer}" method="post" th:action="@{/sales/customer}" class="inline-form">
+                    <input type="text" name="phone" placeholder="Customer phone (optional)">
+                    <button class="btn secondary">Attach</button>
+                </form>
+            </div>
+
+            <div class="actions">
+                <form method="post" th:action="@{/sales/checkout}">
+                    <button class="btn" th:disabled="${rows.isEmpty()}">Complete sale</button>
+                </form>
+                <form method="post" th:action="@{/sales/clear}">
+                    <button class="btn secondary">Cancel sale</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

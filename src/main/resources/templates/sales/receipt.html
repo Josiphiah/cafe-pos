@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Receipt · Café POS</title></head>
+<body>
+<main class="content">
+    <div class="receipt">
+        <div class="receipt-head">
+            <h2>☕ Café POS</h2>
+            <p>Lusaka · VAT No. 1000000000</p>
+        </div>
+
+        <table class="receipt-meta">
+            <tr><td>Receipt</td><td th:text="'#' + ${sale.id}">#0</td></tr>
+            <tr><td>Date</td><td th:text="${#temporals.format(sale.soldAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</td></tr>
+            <tr><td>Cashier</td><td th:text="${sale.cashier.fullName}">Cashier</td></tr>
+            <tr th:if="${sale.customer}"><td>Customer</td><td th:text="${sale.customer.name}">Customer</td></tr>
+        </table>
+
+        <table class="receipt-lines">
+            <thead>
+            <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Total</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${sale.lines}">
+                <td th:text="${l.productName}">Item</td>
+                <td class="num" th:text="${l.quantity}">1</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.unitPrice,1,2)}">0.00</td>
+                <td class="num" th:text="${#numbers.formatDecimal(l.lineTotal,1,2)}">0.00</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="receipt-totals">
+            <tr><td>Subtotal (net)</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.subtotal,1,2)}">K 0.00</td></tr>
+            <tr><td>VAT 16%</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.vatAmount,1,2)}">K 0.00</td></tr>
+            <tr class="grand"><td>Total</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.total,1,2)}">K 0.00</td></tr>
+        </table>
+
+        <p class="receipt-foot">Thank you — please come again.</p>
+    </div>
+
+    <div class="no-print actions">
+        <button class="btn" onclick="window.print()">Print</button>
+        <a class="btn secondary" th:href="@{/sales}">New sale</a>
+        <a class="btn secondary" th:href="@{/history/{id}(id=${sale.id})}">View in history</a>
+    </div>
+</main>
+</body>
+</html>
