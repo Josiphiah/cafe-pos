@@ -7,6 +7,9 @@ import zm.cafe.pos.domain.Sale;
 import zm.cafe.pos.repo.CustomerRepository;
 import zm.cafe.pos.repo.ProductRepository;
 import zm.cafe.pos.repo.SaleRepository;
+import zm.cafe.pos.repo.RefundRepository;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,11 +26,14 @@ public class HomeController {
     private final SaleRepository saleRepo;
     private final ProductRepository productRepo;
     private final CustomerRepository customerRepo;
+    private final RefundRepository refundRepo;
 
-    public HomeController(SaleRepository saleRepo, ProductRepository productRepo, CustomerRepository customerRepo) {
+    public HomeController(SaleRepository saleRepo, ProductRepository productRepo, CustomerRepository customerRepo,
+                          RefundRepository refundRepo) {
         this.saleRepo = saleRepo;
         this.productRepo = productRepo;
         this.customerRepo = customerRepo;
+        this.refundRepo = refundRepo;
     }
 
     /** One bar of the "sales this week" chart. {@code pct} is 0-100 of the tallest day. */
@@ -36,10 +42,18 @@ public class HomeController {
     @GetMapping("/")
     public String index(Model model) {
         List<Sale> all = saleRepo.findAll();
-        BigDecimal total = all.stream().map(Sale::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<Long, BigDecimal> refundedBySale = new HashMap<>();
+        refundRepo.findAll().forEach(refund -> refundedBySale.merge(
+                refund.getSale().getId(), refund.getAmount(), BigDecimal::add));
+        // Preserve original receipt totals; dashboard revenue is money retained after refunds.
+        Map<Long, BigDecimal> netBySale = new HashMap<>();
+        all.forEach(sale -> netBySale.put(sale.getId(), sale.getTotal()
+                .subtract(refundedBySale.getOrDefault(sale.getId(), BigDecimal.ZERO))));
+        BigDecimal total = netBySale.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("salesCount", all.size());
         model.addAttribute("salesTotal", total);
+        model.addAttribute("netBySale", netBySale);
         model.addAttribute("productCount", productRepo.count());
         model.addAttribute("customerCount", customerRepo.count());
 
@@ -57,7 +71,7 @@ public class HomeController {
             LocalDate day = today.minusDays(i);
             BigDecimal dayTotal = all.stream()
                     .filter(s -> s.getSoldAt() != null && s.getSoldAt().toLocalDate().equals(day))
-                    .map(Sale::getTotal)
+                    .map(s -> netBySale.get(s.getId()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             amounts.add(dayTotal);
             if (dayTotal.compareTo(max) > 0) max = dayTotal;

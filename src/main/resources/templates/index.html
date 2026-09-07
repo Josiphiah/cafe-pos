@@ -19,7 +19,7 @@
         </div>
         <div class="tile rise">
             <div class="n">K <span th:text="${#numbers.formatDecimal(salesTotal, 1, 2)}">0.00</span></div>
-            <div class="l">Total taken</div>
+            <div class="l">Total taken (after refunds)</div>
         </div>
         <div class="tile tile--teal rise">
             <div class="n" th:text="${productCount}">0</div>
@@ -34,7 +34,7 @@
     <div class="panel-grid">
         <div class="panel">
             <h2>Sales this week</h2>
-            <p class="lead">K <span th:text="${#numbers.formatDecimal(weekTotal, 1, 2)}">0.00</span> over the last 7 days</p>
+            <p class="lead">K <span th:text="${#numbers.formatDecimal(weekTotal, 1, 2)}">0.00</span> after refunds over the last 7 days</p>
             <div class="chart" th:if="${weekTotal.signum() > 0}">
                 <div class="bar-wrap" th:each="b : ${weekly}">
                     <span class="bv" th:text="${b.amount().signum() > 0 ? #numbers.formatDecimal(b.amount(), 1, 0) : ''}"></span>
@@ -43,12 +43,13 @@
                 </div>
             </div>
             <p th:unless="${weekTotal.signum() > 0}" class="muted" style="padding:24px 0">
-                No sales in the last 7 days yet — they'll chart here once the till starts ringing.
+                No money retained from sales in the last 7 days after refunds.
             </p>
         </div>
 
         <div class="panel">
             <h2>Recent sales</h2>
+            <p class="muted">Amounts shown after refunds.</p>
             <p th:if="${#lists.isEmpty(recentSales)}" class="muted">No sales recorded yet.</p>
             <div th:each="s : ${recentSales}" class="order-row">
                 <span class="dot" th:text="'#' + ${s.id}">#1</span>
@@ -56,7 +57,7 @@
                     <span class="ot" th:text="${s.customer != null ? s.customer.name : 'Walk-in'}">Walk-in</span><br>
                     <span class="om" th:text="${#temporals.format(s.soldAt, 'MMM d, HH:mm')}">date</span>
                 </span>
-                <span class="oa">K <span th:text="${#numbers.formatDecimal(s.total, 1, 2)}">0.00</span></span>
+                <span class="oa">K <span th:text="${#numbers.formatDecimal(netBySale[s.id], 1, 2)}">0.00</span></span>
             </div>
             <p style="margin-top:14px" th:unless="${#lists.isEmpty(recentSales)}">
                 <a class="btn secondary" th:href="@{/history}">All transactions</a>
