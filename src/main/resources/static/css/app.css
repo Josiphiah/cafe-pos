@@ -12,6 +12,8 @@ a:hover { text-decoration: underline; }
 .topbar .brand { font-weight: 700; font-size: 18px; }
 .topbar nav { display: flex; gap: 18px; flex: 1; }
 .topbar .who { display: flex; gap: 12px; align-items: center; font-size: 14px; opacity: .9; }
+.logout-form { margin: 0; }
+.logout-form button { background: none; border: 0; color: #fff; font: inherit; cursor: pointer; padding: 0; text-decoration: underline; }
 
 .content { max-width: 960px; margin: 28px auto; padding: 0 20px; }
 .foot { text-align: center; color: #8a94a6; padding: 30px; font-size: 13px; }

@@ -30,7 +30,10 @@
     </nav>
     <span class="who">
         <span sec:authorize="isAuthenticated()" sec:authentication="name">user</span>
-        <a sec:authorize="isAuthenticated()" th:href="@{/logout}">Logout</a>
+        <!-- Spring Security logout is POST-only when CSRF is on; Thymeleaf adds the _csrf field. -->
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit">Logout</button>
+        </form>
         <a sec:authorize="!isAuthenticated()" th:href="@{/login}">Login</a>
     </span>
 </header>
