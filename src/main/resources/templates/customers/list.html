@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Customers · Café POS</title></head>
+<body>
+<main class="content">
+    <div class="page-head">
+        <div>
+            <h1>Customers</h1>
+            <p>Returning customers, matched by phone at the till.</p>
+        </div>
+    </div>
+
+    <div class="tiles">
+        <div class="tile tile--yellow">
+            <div class="n" th:text="${customerCount}">0</div>
+            <div class="l">Customers on file</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <form method="get" th:action="@{/customers}" class="inline-form" style="margin-bottom:16px">
+            <input type="text" name="q" th:value="${q}" placeholder="Search by name" style="max-width:280px">
+            <button class="btn" type="submit">Search</button>
+            <a th:if="${q != null and !q.isEmpty()}" th:href="@{/customers}">Clear</a>
+        </form>
+
+        <p th:if="${#lists.isEmpty(customers)}" class="muted">No customers found.</p>
+
+        <table th:unless="${#lists.isEmpty(customers)}">
+            <thead><tr><th>Name</th><th>Phone</th><th>On file since</th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${customers}">
+                <td th:text="${c.name}">Name</td>
+                <td th:text="${c.phone != null ? c.phone : '—'}">—</td>
+                <td th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd')}">2026-01-01</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
