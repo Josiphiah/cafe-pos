@@ -1,16 +1,109 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Staff Login · Café POS</title><link rel="stylesheet" th:href="@{/css/app.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Login · Café POS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
-<body><main class="content auth-card">
-    <h1>Staff Login</h1><p class="lead">Sign in with your café staff account.</p>
-    <p class="flash err" th:if="${param.error}">Invalid username or password, or the account is inactive.</p>
-    <p class="flash ok" th:if="${param.logout}">You have signed out successfully.</p>
-    <form th:action="@{/login}" method="post">
-        <div class="form-row"><label for="username">Username</label><input id="username" name="username" autocomplete="username" required autofocus></div>
-        <div class="form-row"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
-        <button class="btn" type="submit">Log in</button>
-    </form>
-</main></body></html>
+<body>
+
+<!-- monochrome cup mark, reused via <use> -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <symbol id="cup" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 8.5h13v5.5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8.5Z"/>
+        <path d="M17 9.5h1.6a2.6 2.6 0 0 1 0 5.2H17"/>
+        <path d="M7.5 2.5c0 1.1-1 1.6-1 2.7M11 2.5c0 1.1-1 1.6-1 2.7"/>
+    </symbol>
+</svg>
+
+<main class="auth" id="auth">
+    <div class="auth__bar" aria-hidden="true"></div>
+
+    <!-- left: monochrome visual -->
+    <aside class="stage" aria-hidden="true">
+        <span class="stage__grain"></span>
+        <div class="stage__mark"><svg class="ic"><use href="#cup"/></svg><span>Café POS</span></div>
+        <p class="stage__copy">One quiet sign-in for the counter and the back office.</p>
+        <svg class="stage__glyph"><use href="#cup"/></svg>
+    </aside>
+
+    <!-- right: form -->
+    <div class="form">
+        <span class="brand reveal">
+            <span class="brand__badge"><svg class="ic"><use href="#cup"/></svg></span>
+            <span>Café POS</span>
+        </span>
+
+        <h1 class="reveal">Log in to your account</h1>
+        <p class="sub reveal">Welcome back. Enter your staff credentials to continue.</p>
+
+        <p class="note note--error reveal" role="alert" th:if="${param.error}">
+            <b>Couldn&rsquo;t sign you in.</b> Check the username and password, or ask your
+            manager whether the account is still active.
+        </p>
+        <p class="note note--ok reveal" role="status" th:if="${param.logout}">
+            You&rsquo;ve been signed out.
+        </p>
+
+        <form th:action="@{/login}" method="post" id="loginForm" novalidate>
+            <div class="field reveal">
+                <input id="username" name="username" type="text" placeholder=" "
+                       autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+                <label for="username">Username</label>
+            </div>
+
+            <div class="field reveal">
+                <input id="password" name="password" type="password" placeholder=" "
+                       autocomplete="current-password" required>
+                <label for="password">Password</label>
+            </div>
+
+            <div class="row reveal">
+                <label class="check">
+                    <input type="checkbox" name="remember-me" value="true">
+                    <span>Remember this device</span>
+                </label>
+                <a class="link" href="#"
+                   title="Ask your café manager to reset it from the Staff screen">Forgot password?</a>
+            </div>
+
+            <button class="submit reveal" type="submit" id="submitBtn">
+                <span class="submit__label">Log in</span>
+                <span class="submit__spin" aria-hidden="true"><i></i></span>
+            </button>
+        </form>
+
+        <p class="foot">Café point-of-sale &middot; authorised staff only</p>
+    </div>
+</main>
+
+<script th:inline="none">
+    // Loading sequence: on submit, lock the button, run the spinner and the
+    // top hairline, then let the real POST proceed.
+    (function () {
+        var auth = document.getElementById('auth');
+        var form = document.getElementById('loginForm');
+        if (!auth || !form) return;
+
+        form.addEventListener('submit', function () {
+            if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+            auth.classList.add('is-loading');
+            document.getElementById('submitBtn').setAttribute('aria-busy', 'true');
+        });
+
+        // Clear the loading state if the page is restored from bfcache (back button).
+        window.addEventListener('pageshow', function (e) {
+            if (e.persisted) auth.classList.remove('is-loading');
+        });
+    })();
+</script>
+
+</body>
+</html>
