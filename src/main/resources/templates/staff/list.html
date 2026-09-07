@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::title}, ~{::section})}">
+<head><title>Staff · Café POS</title></head>
+<body><section>
+    <h1>Staff Administration</h1><p class="lead">Manager-only account management.</p>
+    <p class="flash ok" th:if="${success}" th:text="${success}"></p>
+    <h2>Staff accounts</h2>
+    <table><thead><tr><th>Full name</th><th>Username</th><th>Role</th><th>Status</th></tr></thead><tbody>
+    <tr th:each="member : ${staffMembers}"><td th:text="${member.fullName}">Name</td><td th:text="${member.username}">username</td><td th:text="${member.role}">CASHIER</td><td th:text="${member.active ? 'Active' : 'Inactive'}">Active</td></tr>
+    </tbody></table>
+    <h2>Add staff member</h2>
+    <form th:action="@{/staff}" th:object="${staffForm}" method="post">
+        <div class="form-row"><label for="fullName">Full name</label><input id="fullName" th:field="*{fullName}" required maxlength="80"><small class="field-error" th:errors="*{fullName}"></small></div>
+        <div class="form-row"><label for="username">Username</label><input id="username" th:field="*{username}" required maxlength="40" autocomplete="off"><small class="field-error" th:errors="*{username}"></small></div>
+        <div class="form-row"><label for="password">Temporary password</label><input id="password" th:field="*{password}" type="password" required minlength="8" maxlength="72" autocomplete="new-password"><small class="field-error" th:errors="*{password}"></small></div>
+        <div class="form-row"><label for="role">Role</label><select id="role" th:field="*{role}"><option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option></select><small class="field-error" th:errors="*{role}"></small></div>
+        <button class="btn" type="submit">Create account</button>
+    </form>
+</section></body></html>
