@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="page(title, body)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${title} ?: 'Café POS'">Café POS</title>
+    <title th:replace="${title}">Café POS</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <!--
   SKELETON — shared base layout on main.
-  Use in every page:  <html th:replace="~{layout :: page(~{::title}, ~{::main})}">
-  Do not restyle this file inside a feature slice; put page-specific CSS in app.css
-  under a section comment for your slice.
+  Every page starts with:
+    <html th:replace="~{layout :: page(~{::title}, ~{::main})}" xmlns:th="http://www.thymeleaf.org">
+    <head><title>My Page</title></head>
+    <body><main class="content"> ...page content... </main></body>
+    </html>
+  Put page-specific CSS in app.css under a section comment for your slice — do not
+  restyle this file inside a feature slice.
 -->
 <header class="topbar">
     <a class="brand" th:href="@{/}">☕ Café POS</a>
@@ -29,9 +35,9 @@
     </span>
 </header>
 
-<main class="content" th:fragment="page(title, body)">
-    <div th:replace="${body}">Page content goes here.</div>
-</main>
+<div th:replace="${body}">
+    <main class="content">Page content goes here.</main>
+</div>
 
 <footer class="foot">Advanced Software Engineering Project · Café POS</footer>
 </body>
