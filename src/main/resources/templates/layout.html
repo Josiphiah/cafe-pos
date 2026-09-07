@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} ?: 'Café POS'">Café POS</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<!--
+  SKELETON — shared base layout on main.
+  Use in every page:  <html th:replace="~{layout :: page(~{::title}, ~{::main})}">
+  Do not restyle this file inside a feature slice; put page-specific CSS in app.css
+  under a section comment for your slice.
+-->
+<header class="topbar">
+    <a class="brand" th:href="@{/}">☕ Café POS</a>
+    <nav>
+        <a th:href="@{/sales}">New Sale</a>
+        <a th:href="@{/history}">Transactions</a>
+        <a th:href="@{/customers}">Customers</a>
+        <a th:href="@{/catalog}">Menu</a>
+        <a th:href="@{/staff}" sec:authorize="hasRole('MANAGER')">Staff</a>
+    </nav>
+    <span class="who">
+        <span sec:authorize="isAuthenticated()" sec:authentication="name">user</span>
+        <a sec:authorize="isAuthenticated()" th:href="@{/logout}">Logout</a>
+        <a sec:authorize="!isAuthenticated()" th:href="@{/login}">Login</a>
+    </span>
+</header>
+
+<main class="content" th:fragment="page(title, body)">
+    <div th:replace="${body}">Page content goes here.</div>
+</main>
+
+<footer class="foot">Advanced Software Engineering Project · Café POS</footer>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Dashboard · Café POS</title></head>
+<body>
+<main>
+    <h1>Café POS</h1>
+    <p class="lead">Point of sale for a single café outlet. Pick a task:</p>
+
+    <div class="cards">
+        <a class="card" th:href="@{/sales}">
+            <h3>New Sale</h3><p>Ring up items, attach a customer, print a receipt.</p>
+        </a>
+        <a class="card" th:href="@{/history}">
+            <h3>Transactions</h3><p>Look up past sales and process refunds.</p>
+        </a>
+        <a class="card" th:href="@{/customers}">
+            <h3>Customers</h3><p>Find a returning customer and see what they bought before.</p>
+        </a>
+        <a class="card" th:href="@{/catalog}">
+            <h3>Menu</h3><p>Manage products, categories and prices.</p>
+        </a>
+    </div>
+
+    <table class="stats">
+        <tr><th>Sales recorded</th><td th:text="${salesCount}">0</td></tr>
+        <tr><th>Total taken (K)</th><td th:text="${salesTotal}">0.00</td></tr>
+        <tr><th>Menu items</th><td th:text="${productCount}">0</td></tr>
+        <tr><th>Customers on file</th><td th:text="${customerCount}">0</td></tr>
+    </table>
+</main>
+</body>
+</html>
