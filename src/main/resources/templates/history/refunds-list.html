@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Refunds audit · Café POS</title></head>
+<body>
+<main class="content">
+    <h1>Refunds audit</h1>
+    <p>All recorded refunds, newest first. Amounts are in Zambian kwacha (K).</p>
+    <p><a th:href="@{/history}">Back to transactions</a></p>
+    <p th:if="${#lists.isEmpty(refunds)}">No refunds have been recorded.</p>
+    <table th:unless="${#lists.isEmpty(refunds)}">
+        <thead><tr><th>Refund</th><th>Sale</th><th>Amount (K)</th><th>Reason</th><th>Processed by</th><th>Date and time</th></tr></thead>
+        <tbody><tr th:each="refund : ${refunds}">
+            <td th:text="${refund.id}"></td>
+            <td th:text="${refund.sale.id}"></td>
+            <td th:text="${#numbers.formatDecimal(refund.amount, 1, 2)}"></td>
+            <td th:text="${refund.reason}"></td>
+            <td><span th:text="${refund.processedBy.fullName}"></span> (<span th:text="${refund.processedBy.username}"></span>)</td>
+            <td th:text="${#temporals.format(refund.refundedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr></tbody>
+    </table>
+</main>
+</body>
+</html>

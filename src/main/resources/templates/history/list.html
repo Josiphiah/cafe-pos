@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Transactions · Café POS</title></head>
+<body>
+<main class="content">
+    <h1>Transactions</h1>
+    <p><a class="btn secondary" th:href="@{/history/refunds}">Refunds audit</a></p>
+    <form method="get" th:action="@{/history}">
+        <div class="form-row">
+            <label for="from">From (inclusive)</label>
+            <input id="from" name="from" type="date" th:value="${from}">
+        </div>
+        <div class="form-row">
+            <label for="to">To (inclusive)</label>
+            <input id="to" name="to" type="date" th:value="${to}">
+        </div>
+        <div class="actions">
+        <button class="btn" type="submit">Filter transactions</button>
+        <a th:href="@{/history}">Clear filters</a>
+        </div>
+    </form>
+    <p class="flash err" th:if="${error}" th:text="${error}" role="alert"></p>
+    <p th:if="${#lists.isEmpty(sales) and error == null}">No transactions found for these dates.</p>
+    <table th:unless="${#lists.isEmpty(sales)}">
+        <thead><tr><th>Sale</th><th>Date</th><th>Customer</th><th>Cashier</th><th>Total (K)</th><th>Status</th></tr></thead>
+        <tbody><tr th:each="sale : ${sales}">
+            <td th:text="${sale.id}"></td>
+            <td th:text="${#temporals.format(sale.soldAt, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${sale.customer != null ? sale.customer.name : 'Walk-in'}"></td>
+            <td th:text="${sale.cashier.fullName}"></td>
+            <td th:text="${#numbers.formatDecimal(sale.total, 1, 2)}"></td>
+            <td th:text="${sale.status}"></td>
+        </tr></tbody>
+    </table>
+</main>
+</body>
+</html>
