@@ -37,7 +37,7 @@ class ShellPagesTest {
     void customersListIsReachableByAnyStaff() throws Exception {
         mockMvc.perform(get("/customers"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("customers", "customerCount"));
+                .andExpect(model().attributeExists("rows", "customerCount"));
     }
 
     @Test

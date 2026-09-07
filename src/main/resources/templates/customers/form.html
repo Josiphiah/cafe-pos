@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Register customer · Café POS</title></head>
+<body>
+<main class="content">
+    <div class="page-head">
+        <div>
+            <h1>Register customer</h1>
+            <p>Add a returning customer so their name prints on receipts and their purchases are kept.</p>
+        </div>
+        <a class="btn secondary" th:href="@{/customers}">Back to customers</a>
+    </div>
+
+    <div class="panel">
+        <form th:action="@{/customers}" th:object="${customerForm}" method="post">
+            <p class="flash err" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+
+            <div class="form-row">
+                <label for="name">Name</label>
+                <input id="name" th:field="*{name}" required maxlength="80" placeholder="e.g. Chanda Mwale">
+                <small class="field-error" th:errors="*{name}"></small>
+            </div>
+
+            <div class="form-row">
+                <label for="phone">Phone (optional, unique)</label>
+                <input id="phone" th:field="*{phone}" maxlength="20" placeholder="e.g. 0977123456">
+                <small class="field-error" th:errors="*{phone}"></small>
+            </div>
+
+            <button class="btn" type="submit">Register</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>

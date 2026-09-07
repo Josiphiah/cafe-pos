@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title th:text="${profile.customer.name} + ' · Café POS'">Customer · Café POS</title></head>
+<body>
+<main class="content">
+    <div class="page-head">
+        <div>
+            <h1 th:text="${profile.customer.name}">Customer</h1>
+            <p>
+                <span th:text="${profile.customer.phone != null ? profile.customer.phone : 'no phone on file'}">phone</span>
+                · on file since
+                <span th:text="${#temporals.format(profile.customer.createdAt, 'd MMM yyyy')}">1 Jan 2026</span>
+            </p>
+        </div>
+        <a class="btn secondary" th:href="@{/customers}">Back to customers</a>
+    </div>
+
+    <div class="tiles">
+        <div class="tile tile--yellow">
+            <div class="n" th:text="${profile.purchaseCount()}">0</div>
+            <div class="l">Purchases</div>
+        </div>
+        <div class="tile">
+            <div class="n">K <span th:text="${#numbers.formatDecimal(profile.lifetimeSpend, 1, 2)}">0.00</span></div>
+            <div class="l">Lifetime spend</div>
+        </div>
+        <div class="tile tile--teal">
+            <div class="n" th:text="${profile.lastVisit != null ? #temporals.format(profile.lastVisit, 'd MMM') : '—'}">—</div>
+            <div class="l">Last visit</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Purchase history</h2>
+        <p th:if="${#lists.isEmpty(profile.sales)}" class="muted">No purchases recorded for this customer yet.</p>
+
+        <table th:unless="${#lists.isEmpty(profile.sales)}">
+            <thead>
+            <tr><th>Sale</th><th>Date</th><th>Items</th><th class="num">Total (K)</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${profile.sales}">
+                <td><a th:href="@{/history/{id}(id=${s.id})}" th:text="'#' + ${s.id}">#1</a></td>
+                <td th:text="${#temporals.format(s.soldAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</td>
+                <td th:text="${#lists.size(s.lines)} + ' line(s), ' + ${#aggregates.sum(s.lines.![quantity])} + ' item(s)'">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(s.total, 1, 2)}">0.00</td>
+                <td th:text="${s.status}">COMPLETED</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

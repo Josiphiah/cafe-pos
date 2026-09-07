@@ -9,6 +9,7 @@
             <h1>Customers</h1>
             <p>Returning customers, matched by phone at the till.</p>
         </div>
+        <a class="btn" th:href="@{/customers/new}">+ Register customer</a>
     </div>
 
     <div class="tiles">
@@ -28,17 +29,21 @@
             <a th:if="${q != null and !q.isEmpty()}" th:href="@{/customers}">Clear</a>
         </form>
 
-        <p th:if="${#lists.isEmpty(customers)}" class="muted">No customers found.</p>
+        <p th:if="${#lists.isEmpty(rows)}" class="muted">No customers found.</p>
 
-        <table th:unless="${#lists.isEmpty(customers)}">
-            <thead><tr><th>Name</th><th>Phone</th><th>On file since</th><th></th></tr></thead>
+        <table th:unless="${#lists.isEmpty(rows)}">
+            <thead>
+            <tr><th>Name</th><th>Phone</th><th class="num">Purchases</th><th class="num">Spent (K)</th><th>On file since</th><th></th></tr>
+            </thead>
             <tbody>
-            <tr th:each="c : ${customers}">
-                <td th:text="${c.name}">Name</td>
-                <td th:text="${c.phone != null ? c.phone : '—'}">—</td>
-                <td th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd')}">2026-01-01</td>
+            <tr th:each="r : ${rows}">
+                <td><a th:href="@{/customers/{id}(id=${r.customer.id})}" th:text="${r.customer.name}">Name</a></td>
+                <td th:text="${r.customer.phone != null ? r.customer.phone : '—'}">—</td>
+                <td class="num" th:text="${r.purchases}">0</td>
+                <td class="num" th:text="${#numbers.formatDecimal(r.spend, 1, 2)}">0.00</td>
+                <td th:text="${#temporals.format(r.customer.createdAt, 'yyyy-MM-dd')}">2026-01-01</td>
                 <td>
-                    <form method="post" th:action="@{'/customers/' + ${c.id} + '/delete'}"
+                    <form method="post" th:action="@{'/customers/' + ${r.customer.id} + '/delete'}"
                           onsubmit="return confirm('Remove this customer?');">
                         <button class="btn danger tiny" type="submit">Delete</button>
                     </form>
