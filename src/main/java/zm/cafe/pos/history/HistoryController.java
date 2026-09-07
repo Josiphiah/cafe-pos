@@ -35,17 +35,21 @@ public class HistoryController {
             Model model) {
         model.addAttribute("from", from);
         model.addAttribute("to", to);
+        List<zm.cafe.pos.domain.Sale> results;
         if (from != null && to != null && from.isAfter(to)) {
             model.addAttribute("error", "The start date must be on or before the end date.");
-            model.addAttribute("sales", List.of());
+            results = List.of();
         } else if (from == null && to == null) {
-            model.addAttribute("sales", sales.findByOrderBySoldAtDesc());
+            results = sales.findByOrderBySoldAtDesc();
         } else {
             // Inclusive calendar dates; SQL-safe bounds for an omitted endpoint.
             LocalDateTime start = (from == null ? LocalDate.of(1, 1, 1) : from).atStartOfDay();
             LocalDateTime end = (to == null ? LocalDate.of(9999, 12, 31) : to).atTime(LocalTime.MAX);
-            model.addAttribute("sales", sales.findBySoldAtBetweenOrderBySoldAtDesc(start, end));
+            results = sales.findBySoldAtBetweenOrderBySoldAtDesc(start, end);
         }
+        model.addAttribute("sales", results);
+        model.addAttribute("refundableSaleIds", results.stream().filter(refundService::canRefund)
+                .map(zm.cafe.pos.domain.Sale::getId).toList());
         return "history/list";
     }
 

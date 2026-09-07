@@ -99,6 +99,9 @@ class HistoryControllerTest {
         sales.saveAndFlush(sale);
         String detail = "/history/" + sale.getId();
         String form = detail + "/refund";
+        mvc.perform(get("/history")).andExpect(status().isOk())
+                .andExpect(model().attribute("refundableSaleIds", contains(sale.getId())))
+                .andExpect(content().string(containsString("href=\"" + form + "\"")));
         mvc.perform(get(detail)).andExpect(status().isOk())
                 .andExpect(content().string(containsString("Process refund")));
         mvc.perform(get(form)).andExpect(status().isOk())
@@ -118,6 +121,17 @@ class HistoryControllerTest {
     void missingSaleReturnsNotFound() throws Exception {
         mvc.perform(get("/history/9223372036854775807")).andExpect(status().isNotFound());
         mvc.perform(get("/history/9223372036854775807/refund")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void historyDoesNotOfferRefundForPastOrFullyRefundedSales() throws Exception {
+        saleAt(java.time.LocalDateTime.now().minusDays(1).toString());
+        Sale refunded = saleAt(java.time.LocalDateTime.now().toString());
+        refunded.setStatus(SaleStatus.REFUNDED);
+        sales.saveAndFlush(refunded);
+        mvc.perform(get("/history")).andExpect(status().isOk())
+                .andExpect(model().attribute("refundableSaleIds", empty()))
+                .andExpect(content().string(containsString("Refund unavailable")));
     }
 
     @Test

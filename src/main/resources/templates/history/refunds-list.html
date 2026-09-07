@@ -6,6 +6,8 @@
 <main class="content">
     <h1>Refunds audit</h1>
     <p>All recorded refunds, newest first. Amounts are in Zambian kwacha (K).</p>
+    <p>To process a new refund, choose the original sale from Transactions.</p>
+    <p><a class="btn" th:href="@{/history}">Choose a sale to refund</a></p>
     <p><a th:href="@{/history}">Back to transactions</a></p>
     <p th:if="${#lists.isEmpty(refunds)}">No refunds have been recorded.</p>
     <table th:unless="${#lists.isEmpty(refunds)}">

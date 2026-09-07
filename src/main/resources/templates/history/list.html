@@ -5,6 +5,7 @@
 <body>
 <main class="content">
     <h1>Transactions</h1>
+    <p>To return items, select <strong>Process refund</strong> beside the sale. Refunds are available on the sale date while items remain unrefunded.</p>
     <p><a class="btn secondary" th:href="@{/history/refunds}">Refunds audit</a></p>
     <form method="get" th:action="@{/history}">
         <div class="form-row">
@@ -23,7 +24,7 @@
     <p class="flash err" th:if="${error}" th:text="${error}" role="alert"></p>
     <p th:if="${#lists.isEmpty(sales) and error == null}">No transactions found for these dates.</p>
     <table th:unless="${#lists.isEmpty(sales)}">
-        <thead><tr><th>Sale</th><th>Date</th><th>Customer</th><th>Cashier</th><th>Total (K)</th><th>Status</th></tr></thead>
+        <thead><tr><th>Sale</th><th>Date</th><th>Customer</th><th>Cashier</th><th>Total (K)</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody><tr th:each="sale : ${sales}">
             <td><a th:href="@{/history/{id}(id=${sale.id})}" th:text="${sale.id}"></a></td>
             <td th:text="${#temporals.format(sale.soldAt, 'yyyy-MM-dd HH:mm')}"></td>
@@ -31,6 +32,12 @@
             <td th:text="${sale.cashier.fullName}"></td>
             <td th:text="${#numbers.formatDecimal(sale.total, 1, 2)}"></td>
             <td th:text="${sale.status}"></td>
+            <td>
+                <a th:href="@{/history/{id}(id=${sale.id})}">View sale</a>
+                <a class="btn danger tiny" th:if="${#lists.contains(refundableSaleIds, sale.id)}"
+                   th:href="@{/history/{id}/refund(id=${sale.id})}">Process refund</a>
+                <span class="muted" th:unless="${#lists.contains(refundableSaleIds, sale.id)}">Refund unavailable</span>
+            </td>
         </tr></tbody>
     </table>
 </main>
