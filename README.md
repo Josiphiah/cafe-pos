@@ -1,12 +1,6 @@
-<!--
-  COORDINATOR TODO (Josiphiah): fill in each section below, then delete this comment.
-  This is the repo front page. Domain-model prose was moved to docs/03-domain-model.md.
--->
-
 # Café POS
 
-<!-- One short paragraph: what the system is and who it is for. -->
-_TODO: overview._
+Café POS is a web-based point-of-sale system for a single café outlet, built for the Advanced Software Engineering group project. A member of staff logs in, rings up a sale from the menu, and issues a receipt showing the 16% VAT breakdown and the change due. Returning customers are matched by phone number and registered on the spot at the till, so their name prints on the receipt and their past purchases can be looked up later. Managers additionally maintain the menu and prices, manage staff accounts, and authorise refunds — full or per-item — against same-day transactions. The application runs on an embedded H2 database with no setup, and can switch to MySQL through a Spring profile.
 
 ## Tech stack
 
