@@ -4,30 +4,71 @@
 <head><title>Dashboard · Café POS</title></head>
 <body>
 <main class="content">
-    <h1>Café POS</h1>
-    <p class="lead">Point of sale for a single café outlet. Pick a task:</p>
-
-    <div class="cards">
-        <a class="card" th:href="@{/sales}">
-            <h3>New Sale</h3><p>Ring up items, attach a customer, print a receipt.</p>
-        </a>
-        <a class="card" th:href="@{/history}">
-            <h3>Transactions</h3><p>Look up past sales and process refunds.</p>
-        </a>
-        <a class="card" th:href="@{/customers}">
-            <h3>Customers</h3><p>Find a returning customer and see what they bought before.</p>
-        </a>
-        <a class="card" th:href="@{/catalog}">
-            <h3>Menu</h3><p>Manage products, categories and prices.</p>
-        </a>
+    <div class="page-head">
+        <div>
+            <h1>Dashboard</h1>
+            <p>How the café is doing at a glance.</p>
+        </div>
+        <a class="btn" th:href="@{/sales}">+ New sale</a>
     </div>
 
-    <table class="stats">
-        <tr><th>Sales recorded</th><td th:text="${salesCount}">0</td></tr>
-        <tr><th>Total taken (K)</th><td th:text="${salesTotal}">0.00</td></tr>
-        <tr><th>Menu items</th><td th:text="${productCount}">0</td></tr>
-        <tr><th>Customers on file</th><td th:text="${customerCount}">0</td></tr>
-    </table>
+    <div class="tiles">
+        <div class="tile tile--yellow rise">
+            <div class="n" th:text="${salesCount}">0</div>
+            <div class="l">Sales recorded</div>
+        </div>
+        <div class="tile rise">
+            <div class="n">K <span th:text="${#numbers.formatDecimal(salesTotal, 1, 2)}">0.00</span></div>
+            <div class="l">Total taken</div>
+        </div>
+        <div class="tile tile--teal rise">
+            <div class="n" th:text="${productCount}">0</div>
+            <div class="l">Menu items</div>
+        </div>
+        <div class="tile tile--dark rise">
+            <div class="n" th:text="${customerCount}">0</div>
+            <div class="l">Customers on file</div>
+        </div>
+    </div>
+
+    <div class="panel-grid">
+        <div class="panel">
+            <h2>Sales this week</h2>
+            <p class="lead">K <span th:text="${#numbers.formatDecimal(weekTotal, 1, 2)}">0.00</span> over the last 7 days</p>
+            <div class="chart" th:if="${weekTotal.signum() > 0}">
+                <div class="bar-wrap" th:each="b : ${weekly}">
+                    <span class="bv" th:text="${b.amount().signum() > 0 ? #numbers.formatDecimal(b.amount(), 1, 0) : ''}"></span>
+                    <div class="bar" th:style="'height:' + ${b.pct()} + '%'"></div>
+                    <span class="bl" th:text="${b.label()}">Mon</span>
+                </div>
+            </div>
+            <p th:unless="${weekTotal.signum() > 0}" class="muted" style="padding:24px 0">
+                No sales in the last 7 days yet — they'll chart here once the till starts ringing.
+            </p>
+        </div>
+
+        <div class="panel">
+            <h2>Recent sales</h2>
+            <p th:if="${#lists.isEmpty(recentSales)}" class="muted">No sales recorded yet.</p>
+            <div th:each="s : ${recentSales}" class="order-row">
+                <span class="dot" th:text="'#' + ${s.id}">#1</span>
+                <span class="oi">
+                    <span class="ot" th:text="${s.customer != null ? s.customer.name : 'Walk-in'}">Walk-in</span><br>
+                    <span class="om" th:text="${#temporals.format(s.soldAt, 'MMM d, HH:mm')}">date</span>
+                </span>
+                <span class="oa">K <span th:text="${#numbers.formatDecimal(s.total, 1, 2)}">0.00</span></span>
+            </div>
+            <p style="margin-top:14px" th:unless="${#lists.isEmpty(recentSales)}">
+                <a class="btn secondary" th:href="@{/history}">All transactions</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="cards">
+        <a class="card" th:href="@{/sales}"><h3>New Sale</h3><p>Ring up items, attach a customer, print a receipt.</p></a>
+        <a class="card" th:href="@{/catalog}"><h3>Menu</h3><p>Manage products, categories and prices.</p></a>
+        <a class="card" th:href="@{/customers}"><h3>Customers</h3><p>Find a returning customer and their history.</p></a>
+    </div>
 </main>
 </body>
 </html>

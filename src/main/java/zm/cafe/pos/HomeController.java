@@ -9,8 +9,14 @@ import zm.cafe.pos.repo.ProductRepository;
 import zm.cafe.pos.repo.SaleRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-/** SKELETON — shared scaffold on main. Landing dashboard with headline counts. */
+/** SKELETON — shared scaffold on main. Landing dashboard: headline tiles, a 7-day revenue chart and recent sales. */
 @Controller
 public class HomeController {
 
@@ -24,15 +30,54 @@ public class HomeController {
         this.customerRepo = customerRepo;
     }
 
+    /** One bar of the "sales this week" chart. {@code pct} is 0-100 of the tallest day. */
+    public record Bar(String label, BigDecimal amount, int pct) {}
+
     @GetMapping("/")
     public String index(Model model) {
-        BigDecimal total = saleRepo.findAll().stream()
-                .map(Sale::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        model.addAttribute("salesCount", saleRepo.count());
+        List<Sale> all = saleRepo.findAll();
+        BigDecimal total = all.stream().map(Sale::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("salesCount", all.size());
         model.addAttribute("salesTotal", total);
         model.addAttribute("productCount", productRepo.count());
         model.addAttribute("customerCount", customerRepo.count());
+
+        model.addAttribute("recentSales", all.stream()
+                .filter(s -> s.getSoldAt() != null)
+                .sorted(Comparator.comparing(Sale::getSoldAt).reversed())
+                .limit(6)
+                .toList());
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter dow = DateTimeFormatter.ofPattern("EEE");
+        List<BigDecimal> amounts = new ArrayList<>();
+        BigDecimal max = BigDecimal.ZERO;
+        for (int i = 6; i >= 0; i--) {
+            LocalDate day = today.minusDays(i);
+            BigDecimal dayTotal = all.stream()
+                    .filter(s -> s.getSoldAt() != null && s.getSoldAt().toLocalDate().equals(day))
+                    .map(Sale::getTotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            amounts.add(dayTotal);
+            if (dayTotal.compareTo(max) > 0) max = dayTotal;
+        }
+
+        List<Bar> weekly = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            BigDecimal amt = amounts.get(i);
+            int pct = 0;
+            if (max.signum() > 0) {
+                pct = amt.multiply(BigDecimal.valueOf(100)).divide(max, 0, RoundingMode.HALF_UP).intValue();
+            }
+            if (pct == 0 && amt.signum() > 0) {
+                pct = 6;
+            }
+            weekly.add(new Bar(today.minusDays(6 - i).format(dow), amt, pct));
+        }
+        model.addAttribute("weekly", weekly);
+        model.addAttribute("weekTotal", amounts.stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+
         return "index";
     }
 }

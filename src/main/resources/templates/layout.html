@@ -6,42 +6,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:replace="${title}">Café POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <!--
-  SKELETON — shared base layout on main.
-  Every page starts with:
+  SHARED base layout. Renders the sidebar shell around every page.
+  Each page still starts with:
     <html th:replace="~{layout :: page(~{::title}, ~{::main})}" xmlns:th="http://www.thymeleaf.org">
     <head><title>My Page</title></head>
     <body><main class="content"> ...page content... </main></body>
     </html>
-  Put page-specific CSS in app.css under a section comment for your slice — do not
-  restyle this file inside a feature slice.
+  Slice-specific CSS goes in app.css under a labelled section.
 -->
-<header class="topbar">
-    <a class="brand" th:href="@{/}">☕ Café POS</a>
-    <nav>
-        <a th:href="@{/sales}">New Sale</a>
-        <a th:href="@{/history}">Transactions</a>
-        <a th:href="@{/customers}">Customers</a>
-        <a th:href="@{/catalog}">Menu</a>
-        <a th:href="@{/staff}" sec:authorize="hasRole('MANAGER')">Staff</a>
-    </nav>
-    <span class="who">
-        <span sec:authorize="isAuthenticated()" sec:authentication="name">user</span>
-        <!-- Spring Security logout is POST-only when CSRF is on; Thymeleaf adds the _csrf field. -->
-        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="logout-form">
-            <button type="submit">Logout</button>
-        </form>
-        <a sec:authorize="!isAuthenticated()" th:href="@{/login}">Login</a>
-    </span>
-</header>
 
-<div th:replace="${body}">
-    <main class="content">Page content goes here.</main>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <defs>
+        <g id="i-grid" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </g>
+        <g id="i-cart" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4h2l2.4 12.3a2 2 0 0 0 2 1.7h7.8a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/>
+        </g>
+        <g id="i-receipt" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/>
+        </g>
+        <g id="i-users" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6a3 3 0 0 1 0 6M17 19a5.5 5.5 0 0 0-2-4.3"/>
+        </g>
+        <g id="i-cup" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 8.5h13V14a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9.5h1.6a2.6 2.6 0 0 1 0 5.2H17"/><path d="M7.5 2.5c0 1.1-1 1.6-1 2.7M11 2.5c0 1.1-1 1.6-1 2.7"/>
+        </g>
+        <g id="i-gear" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M5 5l1.5 1.5M17.5 17.5 19 19M3 12h2M19 12h2M5 19l1.5-1.5M17.5 6.5 19 5"/>
+        </g>
+    </defs>
+</svg>
+
+<div class="app">
+    <aside class="app-side">
+        <a class="side-brand" th:href="@{/}">IMAJI <b>Café</b></a>
+
+        <div class="side-user" sec:authorize="isAuthenticated()">
+            <span class="avatar" th:text="${#authentication != null ? #strings.substring(#authentication.name,0,1) : '?'}">?</span>
+            <span>
+                <span class="who-name" sec:authentication="name">staff</span><br>
+                <span class="who-role">Signed in</span>
+            </span>
+        </div>
+
+        <nav class="side-nav">
+            <a data-path="/" th:href="@{/}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-grid"/></svg> Dashboard</a>
+
+            <span class="label">Operations</span>
+            <a data-path="/sales" th:href="@{/sales}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-cart"/></svg> New Sale</a>
+            <a data-path="/history" th:href="@{/history}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-receipt"/></svg> Transactions</a>
+            <a data-path="/customers" th:href="@{/customers}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-users"/></svg> Customers</a>
+
+            <span class="label">Master data</span>
+            <a data-path="/catalog" th:href="@{/catalog}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-cup"/></svg> Menu</a>
+            <a data-path="/staff" th:href="@{/staff}" sec:authorize="hasRole('MANAGER')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-gear"/></svg> Staff</a>
+        </nav>
+
+        <div class="side-foot">
+            <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit">Sign out</button>
+            </form>
+            <a sec:authorize="!isAuthenticated()" class="login-link" th:href="@{/login}">Log in</a>
+            <span class="tag">Café point-of-sale</span>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <div th:replace="${body}">
+            <main class="content">Page content goes here.</main>
+        </div>
+        <footer class="foot">Advanced Software Engineering Project · Café POS</footer>
+    </div>
 </div>
 
-<footer class="foot">Advanced Software Engineering Project · Café POS</footer>
+<script th:inline="none">
+    (function () {
+        var p = location.pathname;
+        document.querySelectorAll('.side-nav a[data-path]').forEach(function (a) {
+            var d = a.getAttribute('data-path');
+            var on = d === '/' ? (p === '/' || p === '') : (p === d || p.indexOf(d + '/') === 0);
+            if (on) a.classList.add('is-active');
+        });
+    })();
+</script>
+
 </body>
 </html>
