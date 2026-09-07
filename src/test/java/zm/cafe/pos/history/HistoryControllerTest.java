@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(properties = {
@@ -28,6 +31,7 @@ class HistoryControllerTest {
     @Autowired SaleRepository sales;
     @Autowired StaffRepository staff;
     @Autowired RefundRepository refunds;
+    @Autowired ProductRepository products;
 
     private Sale saleAt(String date) {
         Sale sale = new Sale(staff.findByUsername("cashier").orElseThrow(), null);
@@ -85,5 +89,43 @@ class HistoryControllerTest {
         mvc.perform(get("/history/refunds"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("No refunds have been recorded.")));
+    }
+
+    @Test
+    void saleDetailRefundFormAndSubmissionWorkTogether() throws Exception {
+        Sale sale = saleAt(java.time.LocalDateTime.now().toString());
+        sale.addLine(new SaleLine(products.findAll().getFirst(), 2));
+        sale.recalculateTotals();
+        sales.saveAndFlush(sale);
+        String detail = "/history/" + sale.getId();
+        String form = detail + "/refund";
+        mvc.perform(get(detail)).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Process refund")));
+        mvc.perform(get(form)).andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"_csrf\"")));
+        mvc.perform(post(form).param("reason", "Return").param("quantity_" + sale.getLines().getFirst().getId(), "1"))
+                .andExpect(status().isForbidden());
+        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("quantity_" + sale.getLines().getFirst().getId(), "1"))
+                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl(detail));
+        mvc.perform(get(detail)).andExpect(status().isOk())
+                .andExpect(content().string(containsString("PARTIALLY_REFUNDED")))
+                .andExpect(content().string(containsString("Return")));
+        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("quantity_" + sale.getLines().getFirst().getId(), "oops"))
+                .andExpect(redirectedUrl(form)).andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    void missingSaleReturnsNotFound() throws Exception {
+        mvc.perform(get("/history/9223372036854775807")).andExpect(status().isNotFound());
+        mvc.perform(get("/history/9223372036854775807/refund")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void anonymousVisitorsMustLogIn() throws Exception {
+        mvc.perform(get("/history/1")).andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
+        mvc.perform(post("/history/1/refund").with(csrf())).andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
     }
 }

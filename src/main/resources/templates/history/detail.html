@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Sale detail · Café POS</title></head>
+<body><main class="content">
+    <h1 th:text="'Sale #' + ${sale.id}"></h1>
+    <p class="flash ok" th:if="${success}" th:text="${success}" role="status"></p>
+    <p>Date: <span th:text="${#temporals.format(sale.soldAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+    <p>Cashier: <span th:text="${sale.cashier.fullName}"></span></p>
+    <p>Customer: <span th:text="${sale.customer != null ? sale.customer.name : 'Walk-in'}"></span></p>
+    <p>Status: <strong th:text="${sale.status}"></strong></p>
+    <table>
+        <thead><tr><th>Item</th><th>Unit price (K)</th><th>Sold</th><th>Refunded</th><th>Remaining</th><th>Line total (K)</th></tr></thead>
+        <tbody><tr th:each="line : ${sale.lines}">
+            <td th:text="${line.productName}"></td><td th:text="${#numbers.formatDecimal(line.unitPrice,1,2)}"></td>
+            <td th:text="${line.quantity}"></td><td th:text="${line.refundedQuantity}"></td>
+            <td th:text="${line.refundableQuantity}"></td><td th:text="${#numbers.formatDecimal(line.lineTotal,1,2)}"></td>
+        </tr></tbody>
+    </table>
+    <p>Original subtotal (K): <span th:text="${#numbers.formatDecimal(sale.subtotal,1,2)}"></span></p>
+    <p>Original VAT (K): <span th:text="${#numbers.formatDecimal(sale.vatAmount,1,2)}"></span></p>
+    <p>Original total (K): <strong th:text="${#numbers.formatDecimal(sale.total,1,2)}"></strong></p>
+    <p>Refunded (K): <span th:text="${#numbers.formatDecimal(refundedTotal,1,2)}"></span></p>
+    <p>Retained after refunds (K): <strong th:text="${#numbers.formatDecimal(remainingTotal,1,2)}"></strong></p>
+    <div class="actions">
+        <a class="btn" th:if="${canRefund}" th:href="@{/history/{id}/refund(id=${sale.id})}">Process refund</a>
+        <a class="btn secondary" th:href="@{/sales/{id}/receipt(id=${sale.id})}">Original receipt</a>
+        <a th:href="@{/history}">Back to transactions</a>
+    </div>
+    <p th:unless="${canRefund}">Refunds are available only on the sale date while unrefunded items remain.</p>
+    <h2>Refund history</h2>
+    <p th:if="${#lists.isEmpty(refunds)}">No refunds for this sale.</p>
+    <section th:each="refund : ${refunds}">
+        <h3 th:text="'Refund #' + ${refund.id}"></h3>
+        <p><span th:text="${#temporals.format(refund.refundedAt, 'yyyy-MM-dd HH:mm:ss')}"></span> · <span th:text="${refund.processedBy.fullName}"></span></p>
+        <p th:text="${refund.reason}"></p>
+        <ul><li th:each="line : ${refund.lines}"><span th:text="${line.saleLine.productName}"></span> × <span th:text="${line.quantity}"></span> — K <span th:text="${#numbers.formatDecimal(line.amount,1,2)}"></span></li></ul>
+        <p>Amount (K): <strong th:text="${#numbers.formatDecimal(refund.amount,1,2)}"></strong></p>
+    </section>
+</main></body></html>

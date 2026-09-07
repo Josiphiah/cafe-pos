@@ -12,7 +12,7 @@
         <thead><tr><th>Refund</th><th>Sale</th><th>Amount (K)</th><th>Reason</th><th>Processed by</th><th>Date and time</th></tr></thead>
         <tbody><tr th:each="refund : ${refunds}">
             <td th:text="${refund.id}"></td>
-            <td th:text="${refund.sale.id}"></td>
+            <td><a th:href="@{/history/{id}(id=${refund.sale.id})}" th:text="${refund.sale.id}"></a></td>
             <td th:text="${#numbers.formatDecimal(refund.amount, 1, 2)}"></td>
             <td th:text="${refund.reason}"></td>
             <td><span th:text="${refund.processedBy.fullName}"></span> (<span th:text="${refund.processedBy.username}"></span>)</td>

@@ -25,7 +25,7 @@
     <table th:unless="${#lists.isEmpty(sales)}">
         <thead><tr><th>Sale</th><th>Date</th><th>Customer</th><th>Cashier</th><th>Total (K)</th><th>Status</th></tr></thead>
         <tbody><tr th:each="sale : ${sales}">
-            <td th:text="${sale.id}"></td>
+            <td><a th:href="@{/history/{id}(id=${sale.id})}" th:text="${sale.id}"></a></td>
             <td th:text="${#temporals.format(sale.soldAt, 'yyyy-MM-dd HH:mm')}"></td>
             <td th:text="${sale.customer != null ? sale.customer.name : 'Walk-in'}"></td>
             <td th:text="${sale.cashier.fullName}"></td>

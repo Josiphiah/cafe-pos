@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::title}, ~{::main})}">
+<head><title>Process refund · Café POS</title></head>
+<body><main class="content">
+    <h1 th:text="'Refund sale #' + ${sale.id}"></h1>
+    <p class="flash err" th:if="${error}" th:text="${error}" role="alert"></p>
+    <p th:unless="${canRefund}">This sale is not eligible. Refunds must be processed on the sale date and have unrefunded items remaining.</p>
+    <form th:if="${canRefund}" method="post" th:action="@{/history/{id}/refund(id=${sale.id})}">
+        <p>Enter the number of each item being returned. For a full refund, enter every remaining quantity. Prices include VAT.</p>
+        <table>
+            <thead><tr><th>Item</th><th>Unit price (K)</th><th>Remaining</th><th>Return quantity</th></tr></thead>
+            <tbody><tr th:each="line : ${sale.lines}">
+                <td><label th:for="'quantity_' + ${line.id}" th:text="${line.productName}"></label></td>
+                <td th:text="${#numbers.formatDecimal(line.unitPrice,1,2)}"></td>
+                <td th:text="${line.refundableQuantity}"></td>
+                <td><input type="number" min="0" step="1" value="0" required th:max="${line.refundableQuantity}" th:id="'quantity_' + ${line.id}" th:name="'quantity_' + ${line.id}"></td>
+            </tr></tbody>
+        </table>
+        <div class="form-row"><label for="reason">Reason for refund</label><input id="reason" name="reason" required maxlength="200"></div>
+        <p>Submitting records the refund against your staff account. Return the recorded amount to the customer using the original payment method.</p>
+        <button class="btn danger" type="submit">Record refund</button>
+    </form>
+    <p><a th:href="@{/history/{id}(id=${sale.id})}">Back to sale</a></p>
+</main></body></html>

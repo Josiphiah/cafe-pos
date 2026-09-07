@@ -5,6 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import zm.cafe.pos.repo.RefundRepository;
 import zm.cafe.pos.repo.SaleRepository;
 
@@ -17,10 +20,12 @@ import java.util.List;
 public class HistoryController {
     private final SaleRepository sales;
     private final RefundRepository refunds;
+    private final RefundService refundService;
 
-    public HistoryController(SaleRepository sales, RefundRepository refunds) {
+    public HistoryController(SaleRepository sales, RefundRepository refunds, RefundService refundService) {
         this.sales = sales;
         this.refunds = refunds;
+        this.refundService = refundService;
     }
 
     @GetMapping("/history")
@@ -48,5 +53,19 @@ public class HistoryController {
     public String refunds(Model model) {
         model.addAttribute("refunds", refunds.findByOrderByRefundedAtDesc());
         return "history/refunds-list";
+    }
+
+    @GetMapping("/history/{id}")
+    public String detail(@PathVariable Long id, Model model) {
+        var sale = sales.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sale not found"));
+        var records = refunds.findBySaleIdOrderByRefundedAtDesc(id);
+        var returned = records.stream().map(zm.cafe.pos.domain.Refund::getAmount)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        model.addAttribute("sale", sale);
+        model.addAttribute("refunds", records);
+        model.addAttribute("refundedTotal", returned);
+        model.addAttribute("remainingTotal", sale.getTotal().subtract(returned));
+        model.addAttribute("canRefund", refundService.canRefund(sale));
+        return "history/detail";
     }
 }
