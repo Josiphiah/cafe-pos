@@ -108,12 +108,17 @@ class HistoryControllerTest {
                 .andExpect(content().string(containsString("name=\"_csrf\"")));
         mvc.perform(post(form).param("reason", "Return").param("quantity_" + sale.getLines().getFirst().getId(), "1"))
                 .andExpect(status().isForbidden());
-        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("quantity_" + sale.getLines().getFirst().getId(), "1"))
+        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("managerPassword", "wrong")
+                        .param("quantity_" + sale.getLines().getFirst().getId(), "1"))
+                .andExpect(redirectedUrl(form)).andExpect(flash().attributeExists("error"));
+        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("managerPassword", "manager123")
+                        .param("quantity_" + sale.getLines().getFirst().getId(), "1"))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl(detail));
         mvc.perform(get(detail)).andExpect(status().isOk())
                 .andExpect(content().string(containsString("PARTIALLY_REFUNDED")))
                 .andExpect(content().string(containsString("Return")));
-        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("quantity_" + sale.getLines().getFirst().getId(), "oops"))
+        mvc.perform(post(form).with(csrf()).param("reason", "Return").param("managerPassword", "manager123")
+                        .param("quantity_" + sale.getLines().getFirst().getId(), "oops"))
                 .andExpect(redirectedUrl(form)).andExpect(flash().attributeExists("error"));
     }
 

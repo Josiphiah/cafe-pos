@@ -17,7 +17,8 @@
             </tr></tbody>
         </table>
         <div class="form-row"><label for="reason">Reason for refund</label><input id="reason" name="reason" required maxlength="200"></div>
-        <p>Submitting records the refund against your staff account. Return the recorded amount to the customer using the original payment method.</p>
+        <div class="form-row"><label for="managerPassword">Manager password</label><input id="managerPassword" name="managerPassword" type="password" required autocomplete="off"></div>
+        <p>A refund must be authorised with a manager password. It is recorded against your staff account; return the amount to the customer using the original payment method.</p>
         <button class="btn danger" type="submit">Record refund</button>
     </form>
     <p><a th:href="@{/history/{id}(id=${sale.id})}">Back to sale</a></p>

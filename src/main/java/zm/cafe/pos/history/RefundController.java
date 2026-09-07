@@ -1,13 +1,16 @@
 package zm.cafe.pos.history;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import zm.cafe.pos.domain.Role;
 import zm.cafe.pos.domain.Sale;
 import zm.cafe.pos.repo.SaleRepository;
+import zm.cafe.pos.repo.StaffRepository;
 
 import java.security.Principal;
 import java.util.LinkedHashMap;
@@ -18,10 +21,25 @@ import java.util.Map;
 public class RefundController {
     private final SaleRepository sales;
     private final RefundService service;
+    private final StaffRepository staff;
+    private final PasswordEncoder passwordEncoder;
 
-    public RefundController(SaleRepository sales, RefundService service) {
+    public RefundController(SaleRepository sales, RefundService service,
+                            StaffRepository staff, PasswordEncoder passwordEncoder) {
         this.sales = sales;
         this.service = service;
+        this.staff = staff;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    /** A refund must be authorised with the password of an active MANAGER account. */
+    private boolean managerAuthorised(String password) {
+        if (password == null || password.isBlank()) {
+            return false;
+        }
+        return staff.findAll().stream()
+                .filter(s -> s.isActive() && s.getRole() == Role.MANAGER)
+                .anyMatch(s -> passwordEncoder.matches(password, s.getPasswordHash()));
     }
 
     @GetMapping
@@ -36,6 +54,10 @@ public class RefundController {
     public String refund(@PathVariable Long id, @RequestParam Map<String, String> parameters,
                          Principal principal, RedirectAttributes redirect) {
         if (principal == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (!managerAuthorised(parameters.get("managerPassword"))) {
+            redirect.addFlashAttribute("error", "Enter a manager password to authorise this refund.");
+            return "redirect:/history/" + id + "/refund";
+        }
         try {
             Map<Long, Integer> quantities = new LinkedHashMap<>();
             for (var entry : parameters.entrySet()) {

@@ -67,6 +67,17 @@ public class CatalogController {
         return "redirect:/catalog";
     }
 
+    @PostMapping("/category")
+    public String addCategory(@RequestParam String name, RedirectAttributes ra) {
+        try {
+            catalogService.createCategory(name);
+            ra.addFlashAttribute("success", "Added category " + name.trim());
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/catalog";
+    }
+
     @PostMapping("/{id}/price")
     public String reprice(@PathVariable Long id, @RequestParam BigDecimal price, RedirectAttributes ra) {
         try {

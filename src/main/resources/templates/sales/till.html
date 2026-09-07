@@ -86,14 +86,19 @@
                 </form>
             </div>
 
-            <div class="actions">
-                <form method="post" th:action="@{/sales/checkout}">
+            <form method="post" th:action="@{/sales/checkout}" class="checkout-box">
+                <div class="form-row">
+                    <label for="amountReceived">Cash received (K) — optional, for change</label>
+                    <input type="number" id="amountReceived" name="amountReceived"
+                           min="0" step="0.01" placeholder="e.g. 100.00">
+                </div>
+                <div class="actions">
                     <button class="btn" th:disabled="${rows.isEmpty()}">Complete sale</button>
-                </form>
-                <form method="post" th:action="@{/sales/clear}">
-                    <button class="btn secondary">Cancel sale</button>
-                </form>
-            </div>
+                </div>
+            </form>
+            <form method="post" th:action="@{/sales/clear}">
+                <button class="btn secondary">Cancel sale</button>
+            </form>
         </section>
     </div>
 </main>

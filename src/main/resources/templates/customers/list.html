@@ -19,6 +19,9 @@
     </div>
 
     <div class="panel">
+        <p class="flash ok" th:if="${success}" th:text="${success}"></p>
+        <p class="flash err" th:if="${error}" th:text="${error}"></p>
+
         <form method="get" th:action="@{/customers}" class="inline-form" style="margin-bottom:16px">
             <input type="text" name="q" th:value="${q}" placeholder="Search by name" style="max-width:280px">
             <button class="btn" type="submit">Search</button>
@@ -28,12 +31,18 @@
         <p th:if="${#lists.isEmpty(customers)}" class="muted">No customers found.</p>
 
         <table th:unless="${#lists.isEmpty(customers)}">
-            <thead><tr><th>Name</th><th>Phone</th><th>On file since</th></tr></thead>
+            <thead><tr><th>Name</th><th>Phone</th><th>On file since</th><th></th></tr></thead>
             <tbody>
             <tr th:each="c : ${customers}">
                 <td th:text="${c.name}">Name</td>
                 <td th:text="${c.phone != null ? c.phone : '—'}">—</td>
                 <td th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd')}">2026-01-01</td>
+                <td>
+                    <form method="post" th:action="@{'/customers/' + ${c.id} + '/delete'}"
+                          onsubmit="return confirm('Remove this customer?');">
+                        <button class="btn danger tiny" type="submit">Delete</button>
+                    </form>
+                </td>
             </tr>
             </tbody>
         </table>

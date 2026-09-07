@@ -35,6 +35,8 @@
             <tr><td>Subtotal (net)</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.subtotal,1,2)}">K 0.00</td></tr>
             <tr><td>VAT 16%</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.vatAmount,1,2)}">K 0.00</td></tr>
             <tr class="grand"><td>Total</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.total,1,2)}">K 0.00</td></tr>
+            <tr th:if="${sale.amountReceived != null}"><td>Cash received</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.amountReceived,1,2)}">K 0.00</td></tr>
+            <tr th:if="${sale.amountReceived != null}"><td>Change</td><td class="num" th:text="'K ' + ${#numbers.formatDecimal(sale.changeGiven,1,2)}">K 0.00</td></tr>
         </table>
 
         <p class="receipt-foot">Thank you — please come again.</p>

@@ -161,6 +161,19 @@
                 <button class="btn-add" type="submit">+ Add item</button>
             </form>
         </section>
+
+        <!-- add category -->
+        <section class="panel" id="add-category">
+            <h2>Add category</h2>
+            <p class="hint">Create a new grouping, then use it when adding items above.</p>
+            <form th:action="@{/catalog/category}" method="post" class="form-grid">
+                <div class="form-row full">
+                    <label for="categoryName">Category name</label>
+                    <input id="categoryName" name="name" required maxlength="40" placeholder="e.g. Smoothies">
+                </div>
+                <button class="btn-add" type="submit">+ Add category</button>
+            </form>
+        </section>
     </main>
 </div>
 

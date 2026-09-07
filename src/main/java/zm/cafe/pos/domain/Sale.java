@@ -51,6 +51,14 @@ public class Sale {
     @Column(nullable = false, length = 20)
     private SaleStatus status = SaleStatus.COMPLETED;
 
+    /** Cash handed over by the customer. {@code null} when it was not recorded at the till. */
+    @Column(precision = 12, scale = 2)
+    private BigDecimal amountReceived;
+
+    /** Change returned to the customer ({@code amountReceived - total}). {@code null} when cash was not recorded. */
+    @Column(precision = 12, scale = 2)
+    private BigDecimal changeGiven;
+
     protected Sale() {
     }
 
@@ -72,6 +80,26 @@ public class Sale {
         this.total = gross.setScale(2, RoundingMode.HALF_UP);
         this.subtotal = total.divide(BigDecimal.ONE.add(VAT_RATE), 2, RoundingMode.HALF_UP);
         this.vatAmount = total.subtract(subtotal);
+    }
+
+    /**
+     * Record the cash tendered and work out the change. Call after
+     * {@link #recalculateTotals()}. A {@code null} amount means cash was not
+     * captured at the till and nothing is stored.
+     *
+     * @throws IllegalArgumentException if the amount is less than the total
+     */
+    public void pay(BigDecimal received) {
+        if (received == null) {
+            return;
+        }
+        BigDecimal amount = received.setScale(2, RoundingMode.HALF_UP);
+        if (amount.compareTo(total) < 0) {
+            throw new IllegalArgumentException(
+                    "Cash received (K" + amount + ") is less than the total (K" + total + ")");
+        }
+        this.amountReceived = amount;
+        this.changeGiven = amount.subtract(total);
     }
 
     public Long getId() {
@@ -120,5 +148,13 @@ public class Sale {
 
     public void setStatus(SaleStatus status) {
         this.status = status;
+    }
+
+    public BigDecimal getAmountReceived() {
+        return amountReceived;
+    }
+
+    public BigDecimal getChangeGiven() {
+        return changeGiven;
     }
 }

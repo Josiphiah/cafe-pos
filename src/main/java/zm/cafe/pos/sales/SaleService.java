@@ -7,6 +7,7 @@ import zm.cafe.pos.repo.CustomerRepository;
 import zm.cafe.pos.repo.ProductRepository;
 import zm.cafe.pos.repo.SaleRepository;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /** Turns a cart into a persisted {@link Sale} with snapshotted lines and stored totals. */
@@ -26,12 +27,14 @@ public class SaleService {
     }
 
     /**
-     * @param items      product id -> quantity (quantity &gt; 0)
-     * @param customerId optional customer to attach, may be {@code null}
-     * @param cashier    the logged-in staff member ringing up the sale
+     * @param items          product id -> quantity (quantity &gt; 0)
+     * @param customerId      optional customer to attach, may be {@code null}
+     * @param cashier         the logged-in staff member ringing up the sale
+     * @param amountReceived  cash tendered by the customer, or {@code null} if not recorded;
+     *                        must be at least the sale total when given
      */
     @Transactional
-    public Sale checkout(Map<Long, Integer> items, Long customerId, Staff cashier) {
+    public Sale checkout(Map<Long, Integer> items, Long customerId, Staff cashier, BigDecimal amountReceived) {
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("Cannot complete a sale with an empty cart");
         }
@@ -54,6 +57,7 @@ public class SaleService {
         }
 
         sale.recalculateTotals();
+        sale.pay(amountReceived);
         return saleRepository.save(sale);
     }
 }

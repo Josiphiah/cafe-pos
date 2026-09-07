@@ -42,6 +42,16 @@ public class CatalogService {
         return categoryRepository.findAll();
     }
 
+    /** Add a new category. Name must be non-blank and not already in use. */
+    @Transactional
+    public Category createCategory(String name) {
+        String cleanName = requireName(name);
+        categoryRepository.findByName(cleanName).ifPresent(c -> {
+            throw new IllegalArgumentException("There is already a category called " + cleanName);
+        });
+        return categoryRepository.save(new Category(cleanName));
+    }
+
     /** Add a new menu item. Price must be greater than zero. */
     @Transactional
     public Product create(String name, Long categoryId, BigDecimal price) {

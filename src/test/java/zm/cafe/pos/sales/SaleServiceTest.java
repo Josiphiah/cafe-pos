@@ -46,7 +46,7 @@ class SaleServiceTest {
         items.put(espresso.getId(), 2);   // 36.00
         items.put(muffin.getId(), 1);     // 22.00
 
-        Sale sale = saleService.checkout(items, null, cashier());
+        Sale sale = saleService.checkout(items, null, cashier(), null);
 
         assertEquals(0, new BigDecimal("58.00").compareTo(sale.getTotal()), "gross total");
         assertEquals(0, new BigDecimal("50.00").compareTo(sale.getSubtotal()), "net of 16% VAT");
@@ -54,12 +54,30 @@ class SaleServiceTest {
         assertEquals(SaleStatus.COMPLETED, sale.getStatus());
         assertEquals(2, sale.getLines().size());
         assertNull(sale.getCustomer());
+        assertNull(sale.getAmountReceived(), "cash not recorded");
+    }
+
+    @Test
+    void cashReceived_computesChange() {
+        Product coffee = product("T-Coffee", "25.00");
+        Sale sale = saleService.checkout(Map.of(coffee.getId(), 2), null, cashier(), new BigDecimal("100"));
+
+        assertEquals(0, new BigDecimal("50.00").compareTo(sale.getTotal()));
+        assertEquals(0, new BigDecimal("100.00").compareTo(sale.getAmountReceived()));
+        assertEquals(0, new BigDecimal("50.00").compareTo(sale.getChangeGiven()));
+    }
+
+    @Test
+    void cashLessThanTotal_isRejected() {
+        Product coffee = product("T-Coffee2", "25.00");
+        assertThrows(IllegalArgumentException.class,
+                () -> saleService.checkout(Map.of(coffee.getId(), 2), null, cashier(), new BigDecimal("40")));
     }
 
     @Test
     void saleLine_snapshotsNameAndPrice() {
         Product p = product("T-Latte", "30.00");
-        Sale sale = saleService.checkout(Map.of(p.getId(), 1), null, cashier());
+        Sale sale = saleService.checkout(Map.of(p.getId(), 1), null, cashier(), null);
 
         SaleLine line = sale.getLines().get(0);
         assertEquals("T-Latte", line.getProductName());
@@ -74,6 +92,6 @@ class SaleServiceTest {
     @Test
     void emptyCart_isRejected() {
         assertThrows(IllegalArgumentException.class,
-                () -> saleService.checkout(Map.of(), null, cashier()));
+                () -> saleService.checkout(Map.of(), null, cashier(), null));
     }
 }

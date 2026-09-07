@@ -128,14 +128,28 @@ public class SalesController {
     }
 
     @PostMapping("/checkout")
-    public String checkout(RedirectAttributes ra) {
+    public String checkout(@RequestParam(required = false) String amountReceived, RedirectAttributes ra) {
         if (cart.isEmpty()) {
             ra.addFlashAttribute("error", "Add at least one item before completing the sale.");
             return "redirect:/sales";
         }
-        Sale sale = saleService.checkout(cart.getQuantities(), cart.getCustomerId(), currentCashier());
-        cart.clear();
-        return "redirect:/sales/" + sale.getId() + "/receipt";
+        java.math.BigDecimal received = null;
+        if (amountReceived != null && !amountReceived.isBlank()) {
+            try {
+                received = new java.math.BigDecimal(amountReceived.trim());
+            } catch (NumberFormatException ex) {
+                ra.addFlashAttribute("error", "Enter cash received as a number, e.g. 100.00");
+                return "redirect:/sales";
+            }
+        }
+        try {
+            Sale sale = saleService.checkout(cart.getQuantities(), cart.getCustomerId(), currentCashier(), received);
+            cart.clear();
+            return "redirect:/sales/" + sale.getId() + "/receipt";
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/sales";
+        }
     }
 
     @GetMapping("/{id}/receipt")
