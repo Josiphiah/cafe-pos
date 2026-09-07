@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import zm.cafe.pos.domain.Product;
 
 /**
  * Menu &amp; product management screen (manager-only — see {@code SecurityConfig}).
@@ -21,6 +25,14 @@ import java.math.BigDecimal;
 @Controller
 @RequestMapping("/catalog")
 public class CatalogController {
+
+    /** Seeded category name -&gt; illustration file in {@code static/img}. Unknown categories fall back to menu-default. */
+    private static final Map<String, String> CATEGORY_IMAGES = Map.of(
+            "Coffee", "coffee",
+            "Tea", "tea",
+            "Pastries", "pastries",
+            "Food", "food",
+            "Cold Drinks", "cold-drinks");
 
     private final CatalogService catalogService;
 
@@ -81,7 +93,15 @@ public class CatalogController {
     }
 
     private void addPageData(Model model) {
-        model.addAttribute("products", catalogService.listAll());
+        List<Product> products = catalogService.listAll();
+        long onMenu = products.stream().filter(Product::isAvailable).count();
+
+        model.addAttribute("products", products);
         model.addAttribute("categories", catalogService.categories());
+        model.addAttribute("categoryImages", CATEGORY_IMAGES);
+        model.addAttribute("statTotal", products.size());
+        model.addAttribute("statOnMenu", onMenu);
+        model.addAttribute("statRetired", products.size() - onMenu);
+        model.addAttribute("statCategories", catalogService.categories().size());
     }
 }

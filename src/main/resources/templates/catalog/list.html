@@ -1,64 +1,168 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::title}, ~{::section})}">
-<head><title>Menu · Café POS</title></head>
-<body><section>
-    <h1>Menu &amp; Products</h1>
-    <p class="lead">Manager-only. Add items, change prices, and take items off the menu.</p>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Menu &amp; Products · Café POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" th:href="@{/css/catalog.css}">
+</head>
+<body>
 
-    <p class="flash ok" th:if="${success}" th:text="${success}"></p>
-    <p class="flash err" th:if="${error}" th:text="${error}"></p>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <defs>
+        <g id="i-grid" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </g>
+        <g id="i-cart" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4h2l2.4 12.3a2 2 0 0 0 2 1.7h7.8a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/>
+        </g>
+        <g id="i-receipt" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/>
+        </g>
+        <g id="i-users" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6a3 3 0 0 1 0 6M17 19a5.5 5.5 0 0 0-2-4.3"/>
+        </g>
+        <g id="i-cup" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 8.5h13V14a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9.5h1.6a2.6 2.6 0 0 1 0 5.2H17"/><path d="M7.5 2.5c0 1.1-1 1.6-1 2.7M11 2.5c0 1.1-1 1.6-1 2.7"/>
+        </g>
+        <g id="i-gear" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M5 5l1.5 1.5M17.5 17.5 19 19M3 12h2M19 12h2M5 19l1.5-1.5M17.5 6.5 19 5"/>
+        </g>
+    </defs>
+</svg>
 
-    <h2>All items</h2>
-    <table>
-        <thead>
-        <tr><th>Item</th><th>Category</th><th class="num">Price (K)</th><th>Status</th><th>Re-price</th><th></th></tr>
-        </thead>
-        <tbody>
-        <tr th:if="${products.isEmpty()}"><td colspan="6" class="muted">No products yet — add one below.</td></tr>
-        <tr th:each="p : ${products}" th:classappend="${p.available} ? '' : 'muted'">
-            <td th:text="${p.name}">Item</td>
-            <td th:text="${p.category.name}">Category</td>
-            <td class="num" th:text="${#numbers.formatDecimal(p.price, 1, 2)}">0.00</td>
-            <td th:text="${p.available} ? 'On menu' : 'Retired'">On menu</td>
-            <td>
-                <form method="post" th:action="@{'/catalog/' + ${p.id} + '/price'}" class="inline-form">
-                    <input type="number" name="price" step="0.01" min="0.01" th:value="${p.price}" class="qty-input price-input" required>
-                    <button type="submit" class="btn secondary tiny">set</button>
-                </form>
-            </td>
-            <td>
-                <form th:if="${p.available}" method="post" th:action="@{'/catalog/' + ${p.id} + '/retire'}">
-                    <button type="submit" class="btn danger tiny">retire</button>
-                </form>
-                <form th:unless="${p.available}" method="post" th:action="@{'/catalog/' + ${p.id} + '/restore'}">
-                    <button type="submit" class="btn secondary tiny">restore</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<div class="shell">
+    <!-- sidebar -->
+    <aside class="sidebar">
+        <div class="side-brand">IMAJI <b>Café</b></div>
 
-    <h2>Add menu item</h2>
-    <form th:action="@{/catalog}" th:object="${productForm}" method="post">
-        <p class="field-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
-        <div class="form-row">
-            <label for="name">Name</label>
-            <input id="name" th:field="*{name}" required maxlength="80">
-            <small class="field-error" th:errors="*{name}"></small>
+        <div class="side-user">
+            <span class="side-user__avatar"
+                  th:text="${#authentication == null ? 'C' : #strings.toUpperCase(#strings.substring(#authentication.name,0,1))}">C</span>
+            <span>
+                <span class="side-user__name"
+                      th:text="${#authentication == null ? 'staff' : #authentication.name}">staff</span><br>
+                <span class="side-user__role">Manager</span>
+            </span>
         </div>
-        <div class="form-row">
-            <label for="categoryId">Category</label>
-            <select id="categoryId" th:field="*{categoryId}">
-                <option value="" th:text="'— choose —'"></option>
-                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-            </select>
-            <small class="field-error" th:errors="*{categoryId}"></small>
+
+        <nav class="side-nav">
+            <span class="side-nav__label">Master data</span>
+            <a th:href="@{/}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-grid"/></svg> Dashboard</a>
+            <a class="is-active" th:href="@{/catalog}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-cup"/></svg> Menu</a>
+            <a th:href="@{/staff}" sec:authorize="hasRole('MANAGER')"><svg class="ic" viewBox="0 0 24 24"><use href="#i-gear"/></svg> Staff</a>
+            <span class="side-nav__label">Main menu</span>
+            <a th:href="@{/sales}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-cart"/></svg> New Sale</a>
+            <a th:href="@{/history}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-receipt"/></svg> Transactions</a>
+            <a th:href="@{/customers}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-users"/></svg> Customers</a>
+        </nav>
+
+        <div class="side-foot">Café point-of-sale</div>
+    </aside>
+
+    <!-- main -->
+    <main class="main">
+        <div class="page-head">
+            <div>
+                <h1>Menu &amp; Products</h1>
+                <p>Add items, adjust prices, and take items off the menu.</p>
+            </div>
+            <a class="btn-add" href="#add">+ Add menu item</a>
         </div>
-        <div class="form-row">
-            <label for="price">Price (K)</label>
-            <input id="price" th:field="*{price}" type="number" step="0.01" min="0.01" required>
-            <small class="field-error" th:errors="*{price}"></small>
+
+        <p class="flash ok"  th:if="${success}" th:text="${success}"></p>
+        <p class="flash err" th:if="${error}"   th:text="${error}"></p>
+
+        <section class="stats">
+            <div class="stat stat--yellow">
+                <div class="stat__n" th:text="${statTotal}">0</div>
+                <div class="stat__l">Menu items</div>
+            </div>
+            <div class="stat">
+                <div class="stat__n" th:text="${statOnMenu}">0</div>
+                <div class="stat__l">On the menu</div>
+            </div>
+            <div class="stat stat--teal">
+                <div class="stat__n" th:text="${statRetired}">0</div>
+                <div class="stat__l">Retired</div>
+            </div>
+            <div class="stat stat--dark">
+                <div class="stat__n" th:text="${statCategories}">0</div>
+                <div class="stat__l">Categories</div>
+            </div>
+        </section>
+
+        <h2 class="section-title">All items</h2>
+        <div class="grid">
+            <p th:if="${products.isEmpty()}" class="flash">No products yet — add one below.</p>
+
+            <article th:each="p : ${products}" class="card"
+                     th:classappend="${p.available} ? '' : 'card--retired'">
+                <div class="card__media">
+                    <img th:src="@{'/img/' + ${categoryImages.getOrDefault(p.category.name, 'menu-default')} + '.svg'}"
+                         th:alt="${p.category.name}">
+                    <span class="card__chip" th:text="${p.category.name}">Category</span>
+                    <span class="card__ribbon" th:unless="${p.available}">Retired</span>
+                </div>
+                <div class="card__body">
+                    <div class="card__name" th:text="${p.name}">Item</div>
+                    <div class="card__price">
+                        <small>K</small> <span th:text="${#numbers.formatDecimal(p.price, 1, 2)}">0.00</span>
+                    </div>
+                    <div class="card__actions">
+                        <form class="reprice" method="post" th:action="@{'/catalog/' + ${p.id} + '/price'}">
+                            <input type="number" name="price" step="0.01" min="0.01"
+                                   th:value="${p.price}" required aria-label="New price">
+                            <button class="btn btn--soft" type="submit">Set</button>
+                        </form>
+                        <form method="post" th:action="@{'/catalog/' + ${p.id} + '/retire'}" th:if="${p.available}">
+                            <button class="btn btn--ghost btn--block" type="submit">Take off menu</button>
+                        </form>
+                        <form method="post" th:action="@{'/catalog/' + ${p.id} + '/restore'}" th:unless="${p.available}">
+                            <button class="btn btn--dark btn--block" type="submit">Put back on menu</button>
+                        </form>
+                    </div>
+                </div>
+            </article>
         </div>
-        <button class="btn" type="submit">Add item</button>
-    </form>
-</section></body></html>
+
+        <!-- add item -->
+        <section class="panel" id="add">
+            <h2>Add menu item</h2>
+            <p class="hint">New items go straight onto the menu at the price you set.</p>
+            <form th:action="@{/catalog}" th:object="${productForm}" method="post">
+                <p class="field-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+                <div class="form-grid">
+                    <div class="form-row full">
+                        <label for="name">Name</label>
+                        <input id="name" th:field="*{name}" required maxlength="80" placeholder="e.g. Flat White">
+                        <small class="field-error" th:errors="*{name}"></small>
+                    </div>
+                    <div class="form-row">
+                        <label for="categoryId">Category</label>
+                        <select id="categoryId" th:field="*{categoryId}">
+                            <option value="">— choose —</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                        <small class="field-error" th:errors="*{categoryId}"></small>
+                    </div>
+                    <div class="form-row">
+                        <label for="price">Price (K)</label>
+                        <input id="price" th:field="*{price}" type="number" step="0.01" min="0.01" required placeholder="0.00">
+                        <small class="field-error" th:errors="*{price}"></small>
+                    </div>
+                </div>
+                <button class="btn-add" type="submit">+ Add item</button>
+            </form>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

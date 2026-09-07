@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Cold drinks">
+  <rect width="400" height="300" fill="#dbe6e4"/>
+  <rect x="150" y="70" width="14" height="150" rx="7" fill="#3e7c8b"/>
+  <path d="M138 96h124l-16 150a20 20 0 0 1-20 18h-52a20 20 0 0 1-20-18z" fill="#5aa0ad"/>
+  <path d="M143 110h114l-4 34h-106z" fill="#bfe0e2"/>
+  <circle cx="175" cy="170" r="12" fill="#eaf6f6" opacity="0.7"/>
+  <circle cx="215" cy="200" r="9" fill="#eaf6f6" opacity="0.7"/>
+  <circle cx="205" cy="150" r="7" fill="#eaf6f6" opacity="0.7"/>
+  <rect x="120" y="252" width="160" height="15" rx="7" fill="#3e7c8b"/>
+</svg>
