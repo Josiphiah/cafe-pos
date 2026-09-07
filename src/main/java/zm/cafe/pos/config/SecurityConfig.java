@@ -17,6 +17,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/css/**", "/error").permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .requestMatchers("/staff/**").hasRole("MANAGER")
+                        .requestMatchers("/catalog/**").hasRole("MANAGER")
                         .anyRequest().authenticated())
                 .formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/", true)
                         .failureUrl("/login?error").permitAll())
