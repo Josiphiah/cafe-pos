@@ -3,6 +3,7 @@ package zm.cafe.pos.sales;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import zm.cafe.pos.domain.*;
 import zm.cafe.pos.repo.*;
@@ -15,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:sale-test;DB_CLOSE_DELAY=-1",
+        "spring.jpa.hibernate.ddl-auto=create-drop"})
 class SaleServiceTest {
 
     @Autowired SaleService saleService;

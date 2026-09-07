@@ -58,6 +58,9 @@
             </table>
 
             <div class="customer-box">
+                <p class="flash ok" th:if="${customerMsg}" th:text="${customerMsg}">msg</p>
+
+                <!-- attached -->
                 <div th:if="${customer}">
                     Customer: <strong th:text="${customer.name}">Name</strong>
                     (<span th:text="${customer.phone}">phone</span>)
@@ -65,7 +68,19 @@
                         <button class="btn secondary tiny">remove</button>
                     </form>
                 </div>
-                <form th:unless="${customer}" method="post" th:action="@{/sales/customer}" class="inline-form">
+
+                <!-- new number: ask for a name -->
+                <form th:if="${customer == null and newPhone != null}" method="post"
+                      th:action="@{/sales/customer/new}" class="inline-form">
+                    <input type="hidden" name="phone" th:value="${newPhone}">
+                    <input type="text" name="name" placeholder="Customer name" autofocus required>
+                    <button class="btn secondary">Save &amp; attach</button>
+                    <span class="muted" th:text="'for ' + ${newPhone}">for …</span>
+                </form>
+
+                <!-- default: look up by phone -->
+                <form th:if="${customer == null and newPhone == null}" method="post"
+                      th:action="@{/sales/customer}" class="inline-form">
                     <input type="text" name="phone" placeholder="Customer phone (optional)">
                     <button class="btn secondary">Attach</button>
                 </form>

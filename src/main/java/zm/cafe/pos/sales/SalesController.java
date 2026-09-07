@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import zm.cafe.pos.customer.CustomerService;
 import zm.cafe.pos.domain.Customer;
 import zm.cafe.pos.domain.Sale;
 import zm.cafe.pos.domain.Staff;
@@ -24,18 +25,21 @@ public class SalesController {
 
     private final CartService cart;
     private final SaleService saleService;
+    private final CustomerService customerService;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final SaleRepository saleRepository;
     private final StaffRepository staffRepository;
 
     public SalesController(CartService cart, SaleService saleService,
+                           CustomerService customerService,
                            ProductRepository productRepository,
                            CustomerRepository customerRepository,
                            SaleRepository saleRepository,
                            StaffRepository staffRepository) {
         this.cart = cart;
         this.saleService = saleService;
+        this.customerService = customerService;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.saleRepository = saleRepository;
@@ -71,14 +75,42 @@ public class SalesController {
         return "redirect:/sales";
     }
 
+    /**
+     * Step 1 of the "name on the cup" flow: look up a phone number. If it is on
+     * file, attach that customer. If not, ask the till for a name (step 2).
+     */
     @PostMapping("/customer")
     public String attachCustomer(@RequestParam String phone, RedirectAttributes ra) {
-        Optional<Customer> found = customerRepository.findByPhone(phone.trim());
+        String p = phone == null ? "" : phone.trim();
+        if (p.isEmpty()) {
+            cart.setCustomerId(null);
+            return "redirect:/sales";
+        }
+        Optional<Customer> found = customerService.findByPhone(p);
         if (found.isPresent()) {
             cart.setCustomerId(found.get().getId());
+            ra.addFlashAttribute("customerMsg", "Welcome back, " + found.get().getName() + ".");
         } else {
-            ra.addFlashAttribute("error", "No customer with phone " + phone
-                    + ". Register them on the Customers page first.");
+            ra.addFlashAttribute("newPhone", p);
+            ra.addFlashAttribute("customerMsg", p + " is new — add a name to save them.");
+        }
+        return "redirect:/sales";
+    }
+
+    /**
+     * Step 2: the number was new, the cashier supplied a name. Create the
+     * customer and attach them so the name prints on the receipt.
+     */
+    @PostMapping("/customer/new")
+    public String registerCustomer(@RequestParam String phone, @RequestParam String name,
+                                   RedirectAttributes ra) {
+        try {
+            Customer c = customerService.findOrRegister(phone, name);
+            cart.setCustomerId(c.getId());
+            ra.addFlashAttribute("customerMsg", "Added " + c.getName() + " to the customer list.");
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("error", ex.getMessage());
+            ra.addFlashAttribute("newPhone", phone == null ? "" : phone.trim());
         }
         return "redirect:/sales";
     }
