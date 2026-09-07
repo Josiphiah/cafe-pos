@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::title}, ~{::section})}">
+<head><title>Menu · Café POS</title></head>
+<body><section>
+    <h1>Menu &amp; Products</h1>
+    <p class="lead">Manager-only. Add items, change prices, and take items off the menu.</p>
+
+    <p class="flash ok" th:if="${success}" th:text="${success}"></p>
+    <p class="flash err" th:if="${error}" th:text="${error}"></p>
+
+    <h2>All items</h2>
+    <table>
+        <thead>
+        <tr><th>Item</th><th>Category</th><th class="num">Price (K)</th><th>Status</th><th>Re-price</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:if="${products.isEmpty()}"><td colspan="6" class="muted">No products yet — add one below.</td></tr>
+        <tr th:each="p : ${products}" th:classappend="${p.available} ? '' : 'muted'">
+            <td th:text="${p.name}">Item</td>
+            <td th:text="${p.category.name}">Category</td>
+            <td class="num" th:text="${#numbers.formatDecimal(p.price, 1, 2)}">0.00</td>
+            <td th:text="${p.available} ? 'On menu' : 'Retired'">On menu</td>
+            <td>
+                <form method="post" th:action="@{'/catalog/' + ${p.id} + '/price'}" class="inline-form">
+                    <input type="number" name="price" step="0.01" min="0.01" th:value="${p.price}" class="qty-input price-input" required>
+                    <button type="submit" class="btn secondary tiny">set</button>
+                </form>
+            </td>
+            <td>
+                <form th:if="${p.available}" method="post" th:action="@{'/catalog/' + ${p.id} + '/retire'}">
+                    <button type="submit" class="btn danger tiny">retire</button>
+                </form>
+                <form th:unless="${p.available}" method="post" th:action="@{'/catalog/' + ${p.id} + '/restore'}">
+                    <button type="submit" class="btn secondary tiny">restore</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Add menu item</h2>
+    <form th:action="@{/catalog}" th:object="${productForm}" method="post">
+        <p class="field-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+        <div class="form-row">
+            <label for="name">Name</label>
+            <input id="name" th:field="*{name}" required maxlength="80">
+            <small class="field-error" th:errors="*{name}"></small>
+        </div>
+        <div class="form-row">
+            <label for="categoryId">Category</label>
+            <select id="categoryId" th:field="*{categoryId}">
+                <option value="" th:text="'— choose —'"></option>
+                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+            </select>
+            <small class="field-error" th:errors="*{categoryId}"></small>
+        </div>
+        <div class="form-row">
+            <label for="price">Price (K)</label>
+            <input id="price" th:field="*{price}" type="number" step="0.01" min="0.01" required>
+            <small class="field-error" th:errors="*{price}"></small>
+        </div>
+        <button class="btn" type="submit">Add item</button>
+    </form>
+</section></body></html>
