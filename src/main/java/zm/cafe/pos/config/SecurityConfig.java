@@ -1,5 +1,6 @@
 package zm.cafe.pos.config;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,29 +8,24 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * SKELETON — shared scaffold on main.
- *
- * <p>Right now every request is permitted so the other vertical slices can be
- * built and demoed independently. The <b>auth / staff-login</b> slice
- * (owner: Salifyanji) replaces the filter chain below with real form login,
- * a {@code UserDetailsService} backed by {@code StaffRepository}, role-based
- * rules (MANAGER vs CASHIER) and logout. Do not build login pages against this
- * placeholder — wait for that slice to land on main.
- */
+/** Security rules for authenticated cafe staff. */
 @Configuration
 public class SecurityConfig {
-
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // H2 console
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**", "/error").permitAll()
+                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .requestMatchers("/staff/**").hasRole("MANAGER")
+                        .anyRequest().authenticated())
+                .formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error").permitAll())
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+                .csrf(csrf -> csrf.ignoringRequestMatchers(PathRequest.toH2Console()))
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         return http.build();
     }
 
-    /** Shared bean — used by the seeder and by the auth slice. */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

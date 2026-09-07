@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Login · Café POS</title><link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body><main class="content auth-card">
+    <h1>Staff Login</h1><p class="lead">Sign in with your café staff account.</p>
+    <p class="flash err" th:if="${param.error}">Invalid username or password, or the account is inactive.</p>
+    <p class="flash ok" th:if="${param.logout}">You have signed out successfully.</p>
+    <form th:action="@{/login}" method="post">
+        <div class="form-row"><label for="username">Username</label><input id="username" name="username" autocomplete="username" required autofocus></div>
+        <div class="form-row"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+        <button class="btn" type="submit">Log in</button>
+    </form>
+</main></body></html>

@@ -1,5 +1,8 @@
 package zm.cafe.pos.sales;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -111,12 +114,16 @@ public class SalesController {
         return "sales/receipt";
     }
 
-    /**
-     * TODO(auth slice #1): replace with {@code CurrentStaff.get()} once Salifyanji's
-     * authentication is on main. Until then every sale is attributed to the seeded
-     * {@code cashier} account.
-     */
+    /** The logged-in staff member ringing up the sale (auth slice #1). */
     private Staff currentCashier() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            Optional<Staff> staff = staffRepository.findByUsername(auth.getName());
+            if (staff.isPresent()) {
+                return staff.get();
+            }
+        }
+        // Fallback for tests / anonymous dev mode.
         return staffRepository.findByUsername("cashier")
                 .or(() -> staffRepository.findAll().stream().findFirst())
                 .orElseThrow(() -> new IllegalStateException("No staff in the database"));
