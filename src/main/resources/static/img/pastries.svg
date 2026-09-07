@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Pastries">
+  <rect width="400" height="300" fill="#f6e6c4"/>
+  <path d="M108 198c0-32 28-58 92-58s92 26 92 58c0 12-11 18-25 12-16-7-31-7-47 0-12 5-28 5-40 0-16-7-31-7-47 0-14 6-25 0-25-12z" fill="#e2a75a"/>
+  <path d="M132 174c14-10 30-14 68-14s54 4 68 14" fill="none" stroke="#b9793a" stroke-width="7" stroke-linecap="round"/>
+  <path d="M150 152c10-8 22-10 50-10s40 2 50 10" fill="none" stroke="#b9793a" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="200" cy="234" rx="118" ry="15" fill="#caa15c"/>
+</svg>

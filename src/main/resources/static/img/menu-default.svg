@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Menu item">
+  <rect width="400" height="300" fill="#ece0c8"/>
+  <circle cx="200" cy="150" r="78" fill="#c8a27a"/>
+  <circle cx="200" cy="150" r="52" fill="#e9dcc2"/>
+  <path d="M182 132c0-10 8-18 18-18s18 8 18 18-8 18-18 26-18-16-18-26z" fill="#8a5a3c"/>
+  <rect x="96" y="238" width="208" height="15" rx="7" fill="#a9805a"/>
+</svg>

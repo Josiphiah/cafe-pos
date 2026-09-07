@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Food">
+  <rect width="400" height="300" fill="#efd9b6"/>
+  <path d="M118 120c0-26 37-46 82-46s82 20 82 46z" fill="#c98a4a"/>
+  <circle cx="150" cy="96" r="4" fill="#f4e3c4"/>
+  <circle cx="190" cy="88" r="4" fill="#f4e3c4"/>
+  <circle cx="232" cy="96" r="4" fill="#f4e3c4"/>
+  <rect x="112" y="124" width="176" height="22" rx="11" fill="#7fae4e"/>
+  <rect x="118" y="146" width="164" height="20" rx="8" fill="#e0554a"/>
+  <rect x="112" y="166" width="176" height="20" rx="9" fill="#f2c14e"/>
+  <path d="M118 188h164c0 24-37 40-82 40s-82-16-82-40z" fill="#b9773c"/>
+  <ellipse cx="200" cy="242" rx="120" ry="14" fill="#d8b57e"/>
+</svg>
