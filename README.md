@@ -1,21 +1,68 @@
-Domain Model Explanation
+<!--
+  COORDINATOR TODO (Josiphiah): fill in each section below, then delete this comment.
+  This is the repo front page. Domain-model prose was moved to docs/03-domain-model.md.
+-->
 
-The Café Point of Sale domain model represents the main real-world concepts involved in the operation of the café. It shows the important conceptual classes, their attributes and the relationships between them. As a domain model, it focuses on business concepts and does not include software methods, database data types, primary keys or foreign keys.
+# Café POS
 
-The **Staff** class represents employees who operate the system. Staff members have a username, full name, role and account status. One staff member can record several sales and process several refunds, while each sale and refund is handled by one staff member.
+<!-- One short paragraph: what the system is and who it is for. -->
+_TODO: overview._
 
-The **Customer** class stores the name, phone number and registration date of a customer. Attaching a customer to a sale is optional because the system also supports walk-in customers. A registered customer can therefore be associated with several sales, while an individual sale can have either one customer or no customer.
+## Tech stack
 
-The **Category** class is used to group related menu items, such as coffee, tea, pastries and cold drinks. One category can contain several products, but each product belongs to one category.
+| Layer | Choice |
+|---|---|
+| Language | Java 21 |
+| Framework | Spring Boot 3.3 (Web, Data JPA, Security, Thymeleaf, Validation) |
+| Database | H2 file-based by default (zero setup); MySQL 8 via the `mysql` profile |
+| Build | Maven (wrapper included — `./mvnw`) |
+| Tests | JUnit 5 + Spring Security Test |
 
-The **Product** class represents an item offered for sale by the café. It contains the product name, price and availability status. A product can appear on several sale lines because it may be purchased in different transactions.
+## Running it
 
-The **Sale** class represents a completed customer transaction. It records the date and time of the sale, subtotal, VAT amount, total amount and sale status. Each sale must contain one or more sale lines.
+```
+./mvnw clean spring-boot:run
+```
 
-The **SaleLine** class represents a particular product included in a sale. It records the product name, unit price, quantity purchased and quantity already refunded. Keeping the product name and price at the time of the sale ensures that historical receipts remain accurate even when product information changes later.
+On Windows PowerShell: `.\mvnw.cmd clean spring-boot:run`.
+Then open <http://localhost:8080>. A file-based H2 database is created at
+`./data/cafepos.mv.db` on first run and seeded with a demo menu and two logins:
 
-The **Refund** class represents money returned to a customer for items from a previous sale. It records the date of the refund, reason and total refunded amount. A sale may have no refunds or several partial refunds.
+| Username | Password | Role |
+|---|---|---|
+| `manager` | `manager123` | MANAGER |
+| `cashier` | `cashier123` | CASHIER |
 
-The **RefundLine** class identifies the particular sale line and quantity included in a refund. Each refund must contain one or more refund lines. A sale line may also appear in multiple refund lines when items are returned through separate partial refunds.
+MySQL instead: create a database `cafepos`, then
+`./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql`.
 
-Overall, the domain model provides a clear conceptual view of how staff, customers, products, sales and refunds interact within the Café POS system. It will guide the development of the database design and the software design class diagram.
+## Project structure
+
+```
+src/main/java/zm/cafe/pos/
+  domain/     JPA entities (Staff, Category, Product, Customer, Sale, SaleLine, Refund, RefundLine)
+  repo/       Spring Data repositories
+  config/     security configuration + demo data seeding
+  auth/       staff login & staff administration          (Issue #1 — Salifyanji)
+  sales/      till, cart, checkout, receipts               (Issue #3 — Josiphiah)
+  catalog/    menu & product management                    (Issue #2 — Goodson)
+  history/    transaction history & refunds                (Issue #4 — Kenneth)
+  customer/   customer profiles & purchase history         (Issue #5 — Vanessa)
+docs/         project documentation                        (Issue #6 — Vanessa)
+```
+
+## Team
+
+| Member | Role | GitHub | Issue |
+|---|---|---|---|
+| Josiphiah | Coordinator | @Josiphiah | #3 |
+| Kenneth | Presenter | @KennethKM | #4 |
+| Goodson | Quality Assurance | @Goodson-Jr | #2 |
+| Salifyanji | Technical Lead | @salimupashi20-ai | #1 |
+| Vanessa Banda | Documentation Lead | @vanessa200321 | #5, #6 |
+
+## Documentation
+
+See [`docs/`](docs/) — requirements, use cases, domain model, design class
+diagram, system sequence diagrams, database design (ERD + 3NF), test plan,
+user manual, and the final report.

@@ -8,7 +8,7 @@ and assembles the rest.
 |---|---|---|
 | `01-requirements.md` | Functional + non-functional requirements, assumptions, scope | ☐ to write |
 | `02-use-cases.md` | Use-case diagram + specifications (Log In, Process Sale, Print Receipt, Look Up Transaction, Process Refund, Register Customer, View Customer Purchase History, Manage Menu) | ☐ to write |
-| `03-domain-model.md` | Domain / conceptual class model | ☐ to write |
+| `03-domain-model.md` | Domain / conceptual class model | 🟡 prose drafted — add the diagram |
 | `04-design-class-diagram.md` | Design class diagram (controllers, services, repositories, entities) | ☐ to write |
 | `05-system-sequence-diagrams.md` | SSDs for Process Sale and Process Refund | ☐ to write |
 | `06-database-design.md` | ERD, data dictionary, 1NF→2NF→3NF walkthrough, DDL | ✅ **draft ready — review against the code** |
